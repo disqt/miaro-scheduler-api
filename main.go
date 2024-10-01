@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"miaro-schedule-api/pkg"
 	"net/http"
+	"path/filepath"
 )
 
 func SchedulerHandler() gin.HandlerFunc {
@@ -25,9 +26,20 @@ func SchedulerHandler() gin.HandlerFunc {
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
+
+	templateFile, err := filepath.Abs("./templates/miaroSchedule.tmpl")
+	if err != nil {
+		panic(err)
+	}
+
+	indexFile, err := filepath.Abs("./templates/index.html")
+	if err != nil {
+		panic(err)
+	}
+
 	router.LoadHTMLFiles(
-		"templates/miaroSchedule.tmpl",
-		"templates/index.html",
+		templateFile,
+		indexFile,
 	)
 	router.GET("/miaro", SchedulerHandler())
 	return router
