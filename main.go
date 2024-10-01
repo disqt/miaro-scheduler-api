@@ -1,11 +1,15 @@
 package main
 
 import (
+	"embed"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"miaro-schedule-api/pkg"
 	"net/http"
-	"path/filepath"
 )
+
+//go:embed templates/*
+var templatesFS embed.FS
 
 func SchedulerHandler() gin.HandlerFunc {
 	fn := func(c *gin.Context) {
@@ -27,20 +31,9 @@ func SchedulerHandler() gin.HandlerFunc {
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 
-	templateFile, err := filepath.Abs("./templates/miaroSchedule.tmpl")
-	if err != nil {
-		panic(err)
-	}
+	tmpl := template.Must(template.ParseFS(templatesFS, "templates/*.tmpl"))
 
-	indexFile, err := filepath.Abs("./templates/index.html")
-	if err != nil {
-		panic(err)
-	}
-
-	router.LoadHTMLFiles(
-		templateFile,
-		indexFile,
-	)
+	router.SetHTMLTemplate(tmpl)
 	router.GET("/miaro", SchedulerHandler())
 	return router
 }
