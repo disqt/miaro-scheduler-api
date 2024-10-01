@@ -1,13 +1,58 @@
 {{ define "miaroSchedule.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miaro Scheduler API</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        h1 {
+            font-size: 2.5em;
+            color: #000;
+            margin-top: 20px;
+            padding-left: 40px; /* Increased left padding */
+        }
 
-<title>Miaro Scheduler API</title>
+        p {
+            font-size: 1.2em;
+            color: #000;
+            line-height: 1.6;
+            padding-left: 40px; /* Increased left padding */
+        }
 
-<h1>Miaro est {{ .Schedule }}.</h1>
+        footer {
+            text-align: center;
+            margin-top: auto;
+            font-size: 0.9em;
+            color: #333;
+            padding: 10px 0;
+            background-color: #f0f0f0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Miaro est {{ .Schedule }}.</h1>
 
-<p>Actuellement, il {{ .IsWorking }}.</p>
+    <p>Actuellement, il {{ .IsWorking }}.</p>
 
-<p>Sauf exception, il retravaillera {{ .NextWorkingDay }} et il sera {{ .ScheduleNextWorkingDay }}.</p>
+    <p>Sauf exception, il retravaillera {{ .NextWorkingDay }} et il sera {{ .ScheduleNextWorkingDay }}.</p>
 
+    <footer>
+        &copy; 2024 Miaro Scheduler API
+    </footer>
+</body>
+</html>
 {{ end }}
