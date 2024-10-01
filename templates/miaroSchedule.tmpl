@@ -1,0 +1,13 @@
+{{ define "miaroSchedule.tmpl" }}
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Miaro Scheduler API</title>
+
+<h1>Miaro est {{ .Schedule }}.</h1>
+
+<p>Actuellement, il {{ .IsWorking }}.</p>
+
+<p>Sauf exception, il retravaillera {{ .NextWorkingDay }} et il sera {{ .ScheduleNextWorkingDay }}.</p>
+
+{{ end }}
