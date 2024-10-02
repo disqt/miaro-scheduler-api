@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -61,76 +60,4 @@ func CalculateSchedule(timeReq ...time.Time) Schedule {
 		scheduleType:  schedule[dayInSchedule],
 		dayInSchedule: dayInSchedule,
 	}
-}
-
-func FormatScheduleBeautified(schedule Schedule) ScheduleBeautified {
-	currentDay := getBeautifiedSchedule(schedule.scheduleType)
-
-	isWorking := isWorkingString(schedule)
-
-	scheduleNextWorkingDay, nextWorkingDay := nextWorkingDay(schedule.dayInSchedule)
-
-	return ScheduleBeautified{
-		Schedule:               currentDay,
-		IsWorking:              isWorking,
-		ScheduleNextWorkingDay: scheduleNextWorkingDay,
-		NextWorkingDay:         nextWorkingDay,
-	}
-}
-
-func getBeautifiedSchedule(scheduleType ScheduleType) string {
-	var beautifiedSchedule string
-	if scheduleType == MORNING {
-		beautifiedSchedule = "du matin"
-	} else if scheduleType == AFTERNOON {
-		beautifiedSchedule = "de l'après-midi"
-	} else if scheduleType == NIGHT {
-		beautifiedSchedule = "de nuit"
-	} else if scheduleType == FREE {
-		beautifiedSchedule = "libre"
-	}
-
-	return beautifiedSchedule
-}
-
-func isWorkingString(schedule Schedule) string {
-	isWorking := false
-
-	if schedule.scheduleType == FREE {
-		isWorking = false
-	}
-
-	hourRequested := schedule.timeRequested.Hour()
-	if schedule.scheduleType == MORNING && (hourRequested >= 6 && hourRequested <= 14) {
-		isWorking = true
-	} else if schedule.scheduleType == AFTERNOON && (hourRequested >= 14 && hourRequested <= 22) {
-		isWorking = true
-	} else if schedule.scheduleType == NIGHT && (hourRequested >= 22 || hourRequested <= 6) {
-		isWorking = true
-	}
-
-	if isWorking {
-		return "est au travail"
-	} else {
-		return "n'est pas au travail"
-	}
-}
-
-func nextWorkingDay(day int) (string, string) {
-	day++ // This is to not return today's date
-	var i = 1
-	for schedule[day+i] == FREE {
-		day = (day + 1) % 10
-		i++
-	}
-
-	var nextWorkingDay string
-
-	if i == 1 {
-		nextWorkingDay = "demain"
-	} else {
-		nextWorkingDay = fmt.Sprintf("dans %v jours", i)
-	}
-
-	return getBeautifiedSchedule(schedule[(day+i)%10]), nextWorkingDay
 }
