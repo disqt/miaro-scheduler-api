@@ -155,3 +155,76 @@ func TestIsWorkingString(t *testing.T) {
 	})
 
 }
+
+func TestNextWorkingDay(t *testing.T) {
+	t.Run("Morning 0", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(0)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+	t.Run("Morning 1", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(1)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "de l'après-midi", schedule)
+	})
+
+	t.Run("Afternoon 2", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(2)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "de l'après-midi", schedule)
+	})
+
+	t.Run("Afternoon 3", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(3)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "de nuit", schedule)
+	})
+
+	t.Run("Nuit  4", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(4)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "de nuit", schedule)
+	})
+
+	t.Run("Nuit  5", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(5)
+
+		assert.Equal(t, "dans 5 jours", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+	t.Run("Libre 6", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(6)
+
+		assert.Equal(t, "dans 4 jours", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+	t.Run("Libre 7", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(7)
+
+		assert.Equal(t, "dans 3 jours", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+	t.Run("Libre 8", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(8)
+
+		assert.Equal(t, "dans 2 jours", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+	t.Run("Libre 9", func(t *testing.T) {
+		schedule, nextDay := nextWorkingDay(9)
+
+		assert.Equal(t, "demain", nextDay)
+		assert.Equal(t, "du matin", schedule)
+	})
+
+}

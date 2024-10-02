@@ -65,11 +65,9 @@ func isWorkingString(schedule Schedule) string {
 }
 
 func nextWorkingDay(day int) (string, string) {
-	day++ // This is to not return today's date
-	var i = 1
+	i := 1 // We initialise at 1 to start from tomorrow
 	for schedule[day+i] == FREE {
-		day = (day + 1) % 10
-		i++
+		i = i + 1
 	}
 
 	var nextWorkingDay string
