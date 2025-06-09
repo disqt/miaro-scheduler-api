@@ -228,3 +228,24 @@ func TestNextWorkingDay(t *testing.T) {
 	})
 
 }
+
+func TestCalculateSchedule_UsesParisTimezone(t *testing.T) {
+	utc := time.Date(2025, 6, 9, 13, 30, 0, 0, time.UTC)
+
+	result := CalculateSchedule(utc)
+
+	// the returned time requested should be in the Paris timezone
+	// 13:30 UTC should be 15:30 in Europe/Paris (UTC + 2)
+	expectedHour := 15
+	expectedMinute := 30
+
+	if result.timeRequested.Location().String() != "Europe/Paris" {
+		t.Errorf("Expected time to be in Paris timezone, got %s", result.timeRequested.Location().String())
+	}
+
+	if result.timeRequested.Hour() != expectedHour || result.timeRequested.Minute() != expectedMinute {
+		t.Errorf("Expected time %02d:%02d, got %02d:%02d",
+			expectedHour, expectedMinute,
+			result.timeRequested.Hour(), result.timeRequested.Minute())
+	}
+}
