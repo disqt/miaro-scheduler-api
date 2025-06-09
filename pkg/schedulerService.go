@@ -39,12 +39,13 @@ This will exit the program if there are more than 1 parameter.
 */
 func CalculateSchedule(timeReq ...time.Time) Schedule {
 	var date time.Time
+	loc, _ := time.LoadLocation("Europe/Paris")
 
 	// This is to support optional parameters
 	if len(timeReq) == 0 {
-		date = time.Now()
+		date = time.Now().In(loc)
 	} else if len(timeReq) == 1 {
-		date = timeReq[0]
+		date = timeReq[0].In(loc)
 	} else {
 		panic("Received multiple dates")
 	}
