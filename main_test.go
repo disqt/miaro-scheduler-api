@@ -20,9 +20,9 @@ func TestMain(m *testing.M) {
 
 func setupTestRouter() *gin.Engine {
 	config := &pkg.Config{
-		Port:          "8081",
-		Timezone:      "Europe/Paris",
-		EnableCORS:    false,
+		Port:       "8081",
+		Timezone:   "Europe/Paris",
+		EnableCORS: false,
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{

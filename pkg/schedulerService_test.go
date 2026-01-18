@@ -35,11 +35,11 @@ func TestCalculateSchedule_SpecificDates(t *testing.T) {
 	loc, _ := time.LoadLocation("Europe/Paris")
 
 	testCases := []struct {
-		name          string
-		date          time.Time
-		expectedDay   int
-		expectedType  ScheduleType
-		description   string
+		name         string
+		date         time.Time
+		expectedDay  int
+		expectedType ScheduleType
+		description  string
 	}{
 		{
 			name:         "Start date (Aug 31, 2024)",
