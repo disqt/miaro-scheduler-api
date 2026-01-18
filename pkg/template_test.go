@@ -35,8 +35,8 @@ func TestGetBeautifiedSchedule(t *testing.T) {
 func TestIsWorkingString(t *testing.T) {
 	t.Run("7h matin", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 7, 0, 0, 0, time.UTC),
-			dayInSchedule: 0,
+			TimeRequested: time.Date(2024, time.August, 31, 7, 0, 0, 0, time.UTC),
+			DayInSchedule: 0,
 		}
 
 		res := isWorkingString(schedule)
@@ -46,8 +46,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("5h matin", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
-			dayInSchedule: 1,
+			TimeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
+			DayInSchedule: 1,
 		}
 
 		res := isWorkingString(schedule)
@@ -57,8 +57,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("15h aprem", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 15, 0, 0, 0, time.UTC),
-			dayInSchedule: 3,
+			TimeRequested: time.Date(2024, time.August, 31, 15, 0, 0, 0, time.UTC),
+			DayInSchedule: 3,
 		}
 
 		res := isWorkingString(schedule)
@@ -68,8 +68,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("13h aprem", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 13, 0, 0, 0, time.UTC),
-			dayInSchedule: 2,
+			TimeRequested: time.Date(2024, time.August, 31, 13, 0, 0, 0, time.UTC),
+			DayInSchedule: 2,
 		}
 
 		res := isWorkingString(schedule)
@@ -79,8 +79,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("23h premiere nuit", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 23, 0, 0, 0, time.UTC),
-			dayInSchedule: 4,
+			TimeRequested: time.Date(2024, time.August, 31, 23, 0, 0, 0, time.UTC),
+			DayInSchedule: 4,
 		}
 
 		res := isWorkingString(schedule)
@@ -90,8 +90,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("13h premiere nuit", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 13, 0, 0, 0, time.UTC),
-			dayInSchedule: 4,
+			TimeRequested: time.Date(2024, time.August, 31, 13, 0, 0, 0, time.UTC),
+			DayInSchedule: 4,
 		}
 
 		res := isWorkingString(schedule)
@@ -101,8 +101,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("5h 2eme nuit", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
-			dayInSchedule: 5,
+			TimeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
+			DayInSchedule: 5,
 		}
 
 		res := isWorkingString(schedule)
@@ -112,8 +112,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("8h 2eme nuit", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 8, 0, 0, 0, time.UTC),
-			dayInSchedule: 5,
+			TimeRequested: time.Date(2024, time.August, 31, 8, 0, 0, 0, time.UTC),
+			DayInSchedule: 5,
 		}
 
 		res := isWorkingString(schedule)
@@ -123,8 +123,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("23h 2eme nuit", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 23, 0, 0, 0, time.UTC),
-			dayInSchedule: 5,
+			TimeRequested: time.Date(2024, time.August, 31, 23, 0, 0, 0, time.UTC),
+			DayInSchedule: 5,
 		}
 
 		res := isWorkingString(schedule)
@@ -134,8 +134,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("5h premiere journee libre", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
-			dayInSchedule: 6,
+			TimeRequested: time.Date(2024, time.August, 31, 5, 0, 0, 0, time.UTC),
+			DayInSchedule: 6,
 		}
 
 		res := isWorkingString(schedule)
@@ -145,8 +145,8 @@ func TestIsWorkingString(t *testing.T) {
 
 	t.Run("8h premiere journee libre", func(t *testing.T) {
 		schedule := Schedule{
-			timeRequested: time.Date(2024, time.August, 31, 8, 0, 0, 0, time.UTC),
-			dayInSchedule: 6,
+			TimeRequested: time.Date(2024, time.August, 31, 8, 0, 0, 0, time.UTC),
+			DayInSchedule: 6,
 		}
 
 		res := isWorkingString(schedule)
@@ -239,13 +239,13 @@ func TestCalculateSchedule_UsesParisTimezone(t *testing.T) {
 	expectedHour := 15
 	expectedMinute := 30
 
-	if result.timeRequested.Location().String() != "Europe/Paris" {
-		t.Errorf("Expected time to be in Paris timezone, got %s", result.timeRequested.Location().String())
+	if result.TimeRequested.Location().String() != "Europe/Paris" {
+		t.Errorf("Expected time to be in Paris timezone, got %s", result.TimeRequested.Location().String())
 	}
 
-	if result.timeRequested.Hour() != expectedHour || result.timeRequested.Minute() != expectedMinute {
+	if result.TimeRequested.Hour() != expectedHour || result.TimeRequested.Minute() != expectedMinute {
 		t.Errorf("Expected time %02d:%02d, got %02d:%02d",
 			expectedHour, expectedMinute,
-			result.timeRequested.Hour(), result.timeRequested.Minute())
+			result.TimeRequested.Hour(), result.TimeRequested.Minute())
 	}
 }
