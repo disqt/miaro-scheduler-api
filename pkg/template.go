@@ -2,19 +2,23 @@ package pkg
 
 import "fmt"
 
+// ScheduleBeautified contains human-readable French text representations of the schedule information.
 type ScheduleBeautified struct {
-	Schedule               string
-	IsWorking              string
-	ScheduleNextWorkingDay string
-	NextWorkingDay         string
+	Schedule               string // e.g., "du matin", "de l'après-midi", "de nuit", "libre"
+	IsWorking              string // e.g., "est au travail", "n'est pas au travail"
+	ScheduleNextWorkingDay string // e.g., "du matin" (for the next working day)
+	NextWorkingDay         string // e.g., "demain", "dans 3 jours"
 }
 
+// FormatScheduleBeautified converts a Schedule into human-readable French text.
+// It determines the current shift type, whether the person is currently working,
+// and when the next working day will be.
 func FormatScheduleBeautified(schedule Schedule) ScheduleBeautified {
-	currentDay := getBeautifiedSchedule(schedule.scheduleType)
+	currentDay := getBeautifiedSchedule(schedule.ScheduleType)
 
 	isWorking := isWorkingString(schedule)
 
-	scheduleNextWorkingDay, nextWorkingDay := nextWorkingDay(schedule.dayInSchedule)
+	scheduleNextWorkingDay, nextWorkingDay := nextWorkingDay(schedule.DayInSchedule)
 
 	return ScheduleBeautified{
 		Schedule:               currentDay,
@@ -42,8 +46,8 @@ func getBeautifiedSchedule(scheduleType ScheduleType) string {
 func isWorkingString(schedule Schedule) string {
 	isWorking := false
 
-	hour := schedule.timeRequested.Hour()
-	dayInSchedule := schedule.dayInSchedule
+	hour := schedule.TimeRequested.Hour()
+	dayInSchedule := schedule.DayInSchedule
 
 	if (dayInSchedule == 0 || dayInSchedule == 1) && (hour >= 6 && hour < 14) {
 		isWorking = true
@@ -66,7 +70,7 @@ func isWorkingString(schedule Schedule) string {
 
 func nextWorkingDay(day int) (string, string) {
 	i := 1 // We initialise at 1 to start from tomorrow
-	for schedule[day+i] == FREE {
+	for schedule[(day+i)%10] == FREE {
 		i = i + 1
 	}
 

@@ -26,10 +26,11 @@ var schedule = map[int]ScheduleType{
 	9: FREE,
 }
 
+// Schedule represents the work schedule information for a given time.
 type Schedule struct {
-	timeRequested time.Time
-	scheduleType  ScheduleType
-	dayInSchedule int
+	TimeRequested time.Time    `json:"time_requested"`
+	ScheduleType  ScheduleType `json:"schedule_type"`
+	DayInSchedule int          `json:"day_in_schedule"`
 }
 
 /*
@@ -39,7 +40,10 @@ This will exit the program if there are more than 1 parameter.
 */
 func CalculateSchedule(timeReq ...time.Time) Schedule {
 	var date time.Time
-	loc, _ := time.LoadLocation("Europe/Paris")
+	loc, err := time.LoadLocation("Europe/Paris")
+	if err != nil {
+		panic("Failed to load Europe/Paris timezone: " + err.Error())
+	}
 
 	// This is to support optional parameters
 	if len(timeReq) == 0 {
@@ -50,15 +54,16 @@ func CalculateSchedule(timeReq ...time.Time) Schedule {
 		panic("Received multiple dates")
 	}
 
-	initialDate := time.Date(2024, time.August, 31, 0, 0, 0, 0, time.UTC)
+	// Use the same timezone for the initial date to ensure consistent day calculations
+	initialDate := time.Date(2024, time.August, 31, 0, 0, 0, 0, loc)
 
 	diffDays := int(date.Sub(initialDate).Hours() / 24)
 
 	dayInSchedule := diffDays % 10
 
 	return Schedule{
-		timeRequested: date,
-		scheduleType:  schedule[dayInSchedule],
-		dayInSchedule: dayInSchedule,
+		TimeRequested: date,
+		ScheduleType:  schedule[dayInSchedule],
+		DayInSchedule: dayInSchedule,
 	}
 }

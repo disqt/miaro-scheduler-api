@@ -1,11 +1,19 @@
 package main
 
 import (
+	"context"
 	"embed"
-	"github.com/gin-gonic/gin"
 	"html/template"
+	"log/slog"
 	"miaro-schedule-api/pkg"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 // Embed the templates directory
@@ -13,6 +21,7 @@ import (
 //go:embed templates/*
 var templatesFS embed.FS
 
+// SchedulerHandler returns a Gin handler for the HTML schedule endpoint.
 func SchedulerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		schedule := pkg.CalculateSchedule()
@@ -27,25 +36,144 @@ func SchedulerHandler() gin.HandlerFunc {
 	}
 }
 
-func setupRouter() *gin.Engine {
-	router := gin.Default()
+// SchedulerJSONHandler returns a Gin handler for the JSON schedule endpoint.
+func SchedulerJSONHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		schedule := pkg.CalculateSchedule()
+		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
+
+		c.JSON(http.StatusOK, gin.H{
+			"schedule":                  scheduleBeautified.Schedule,
+			"is_working":                scheduleBeautified.IsWorking,
+			"next_working_day":          scheduleBeautified.NextWorkingDay,
+			"schedule_next_working_day": scheduleBeautified.ScheduleNextWorkingDay,
+			"raw_schedule":              schedule,
+		})
+	}
+}
+
+// HealthCheckHandler returns a Gin handler for health checks.
+func HealthCheckHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "ok",
+			"service": "miaro-scheduler-api",
+		})
+	}
+}
+
+func setupRouter(config *pkg.Config, logger *slog.Logger) *gin.Engine {
+	router := gin.New()
+
+	// Add middleware
+	router.Use(gin.Recovery())
+	router.Use(LoggerMiddleware(logger))
+
+	// Configure CORS if enabled
+	if config.EnableCORS {
+		corsConfig := cors.DefaultConfig()
+		corsConfig.AllowAllOrigins = true
+		router.Use(cors.New(corsConfig))
+		logger.Info("CORS enabled")
+	}
 
 	// Parse the templates from the embedded filesystem
 	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*.tmpl"))
 	router.SetHTMLTemplate(tmpl)
 
-	// Define your routes
+	// Define routes
+	router.GET("/health", HealthCheckHandler())
 	router.GET("/miaro", SchedulerHandler())
+	router.GET("/miaro/json", SchedulerJSONHandler())
 
 	return router
 }
 
-func main() {
-	router := setupRouter()
+// LoggerMiddleware creates a Gin middleware for structured logging.
+func LoggerMiddleware(logger *slog.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
 
-	// Start the server
-	err := router.Run(":8081")
+		c.Next()
+
+		latency := time.Since(start)
+		statusCode := c.Writer.Status()
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+
+		if raw != "" {
+			path = path + "?" + raw
+		}
+
+		logger.Info("request",
+			"method", method,
+			"path", path,
+			"status", statusCode,
+			"latency", latency,
+			"client_ip", clientIP,
+		)
+	}
+}
+
+func main() {
+	// Setup structured logging
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
+
+	logger.Info("Starting Miaro Scheduler API")
+
+	// Load configuration
+	config, err := pkg.LoadConfig()
 	if err != nil {
+		logger.Error("Failed to load configuration", "error", err)
 		panic(err)
 	}
+
+	logger.Info("Configuration loaded",
+		"port", config.Port,
+		"timezone", config.Timezone,
+		"cors_enabled", config.EnableCORS,
+	)
+
+	router := setupRouter(config, logger)
+
+	// Create HTTP server
+	srv := &http.Server{
+		Addr:         ":" + config.Port,
+		Handler:      router,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	// Start server in a goroutine
+	go func() {
+		logger.Info("Server starting", "port", config.Port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("Server failed to start", "error", err)
+			panic(err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Info("Shutting down server...")
+
+	// Give outstanding requests 5 seconds to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("Server forced to shutdown", "error", err)
+		panic(err)
+	}
+
+	logger.Info("Server exited")
 }
