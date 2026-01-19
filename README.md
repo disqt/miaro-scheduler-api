@@ -1,18 +1,19 @@
 # miaro-scheduler-api
 
-A simple Go API to track an unusual 10-day rotating work schedule. The API provides both HTML and JSON endpoints to check the current work status and schedule.
+A Go API to track a 10-day rotating work schedule. Provides both a modern HTML dashboard and JSON endpoints to check the current work status and schedule.
 
 ## Features
 
-- 🔄 10-day rotating work schedule (Morning, Afternoon, Night shifts + Free days)
-- 🌍 Timezone-aware (Europe/Paris)
-- 📊 JSON and HTML endpoints
-- 🏥 Health check endpoint for monitoring
-- 🔒 CORS support (configurable)
-- 📝 Structured JSON logging
-- 🐳 Docker support
-- ✅ Comprehensive test coverage
-- 🚀 Graceful shutdown
+- 10-day rotating work schedule (Morning, Afternoon, Night shifts + Free days)
+- Modern UI with Bootswatch Lux theme and visual calendar view
+- Timezone-aware calculations (Europe/Paris)
+- JSON and HTML endpoints
+- Health check endpoint for monitoring
+- CORS support (configurable)
+- Structured JSON logging
+- Systemd service support
+- Comprehensive test coverage
+- Graceful shutdown
 
 ## Schedule Pattern
 
@@ -27,13 +28,108 @@ The 10-day cycle repeats as follows:
 
 The cycle started on August 31, 2024.
 
+## Quick Start
+
+### Prerequisites
+
+- Go 1.21+
+
+### Run Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/disqt/miaro-scheduler-api.git
+cd miaro-scheduler-api
+
+# Run directly
+go run .
+
+# Or build and run
+go build -o miaro-scheduler-api .
+./miaro-scheduler-api
+```
+
+The API will be available at `http://localhost:8081/miaro`
+
+## Deployment
+
+The service runs as a systemd unit on the VPS.
+
+### Deploy Script
+
+A deployment script is provided for convenience:
+
+```bash
+# Make the script executable
+chmod +x scripts/deploy.sh
+
+# Run tests
+./scripts/deploy.sh test
+
+# Build binary
+./scripts/deploy.sh build
+
+# Full deploy (test + build + install + restart service)
+./scripts/deploy.sh deploy
+
+# Other commands
+./scripts/deploy.sh restart   # Restart service
+./scripts/deploy.sh stop      # Stop service
+./scripts/deploy.sh logs      # View logs (journalctl)
+./scripts/deploy.sh status    # Check service status and health
+./scripts/deploy.sh help      # Show all commands
+```
+
+### Manual Deployment
+
+```bash
+# Build the binary
+CGO_ENABLED=0 go build -o miaro-scheduler-api .
+
+# Copy to server
+sudo mkdir -p /opt/miaro-scheduler-api
+sudo cp miaro-scheduler-api /opt/miaro-scheduler-api/
+sudo cp -r templates /opt/miaro-scheduler-api/
+
+# Install systemd service (first time only)
+sudo cp scripts/miaro-scheduler-api.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable miaro-scheduler-api
+
+# Start/restart service
+sudo systemctl restart miaro-scheduler-api
+```
+
+### Systemd Service
+
+The service file is located at `scripts/miaro-scheduler-api.service`. Install it with:
+
+```bash
+sudo cp scripts/miaro-scheduler-api.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable miaro-scheduler-api
+sudo systemctl start miaro-scheduler-api
+```
+
+Useful commands:
+
+```bash
+# Check status
+sudo systemctl status miaro-scheduler-api
+
+# View logs
+sudo journalctl -u miaro-scheduler-api -f
+
+# Restart
+sudo systemctl restart miaro-scheduler-api
+```
+
 ## API Endpoints
 
 ### GET /health
 
-Health check endpoint for monitoring and load balancers.
+Health check endpoint for monitoring.
 
-**Response:**
 ```json
 {
   "status": "ok",
@@ -43,15 +139,16 @@ Health check endpoint for monitoring and load balancers.
 
 ### GET /miaro
 
-Returns an HTML page displaying the current schedule in French.
-
-**Response:** HTML page with schedule information
+Returns an HTML dashboard displaying the current schedule with:
+- Current work status (working/not working)
+- Current shift details
+- Visual calendar view of the month
+- Next working day indicator
 
 ### GET /miaro/json
 
 Returns schedule information in JSON format.
 
-**Response:**
 ```json
 {
   "schedule": "du matin",
@@ -68,7 +165,7 @@ Returns schedule information in JSON format.
 
 ## Configuration
 
-The application can be configured using environment variables:
+Environment variables (set in the systemd service file):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -76,140 +173,74 @@ The application can be configured using environment variables:
 | `TIMEZONE` | `Europe/Paris` | Timezone for schedule calculations |
 | `ENABLE_CORS` | `false` | Enable CORS for cross-origin requests |
 
-## Building
-
-### Local Build
-
-```bash
-go build ./main.go
-```
-
-### Running Locally
-
-```bash
-go run ./main.go
-```
-
-The API will listen on `http://localhost:8081` by default.
-
-### With Custom Configuration
-
-```bash
-PORT=3000 ENABLE_CORS=true go run ./main.go
-```
-
-## Docker
-
-### Build Docker Image
-
-```bash
-docker build -t miaro-scheduler-api .
-```
-
-### Run Docker Container
-
-```bash
-docker run -p 8081:8081 miaro-scheduler-api
-```
-
-### With Environment Variables
-
-```bash
-docker run -p 3000:3000 \
-  -e PORT=3000 \
-  -e ENABLE_CORS=true \
-  miaro-scheduler-api
-```
-
 ## Testing
 
-### Run All Tests
-
 ```bash
+# Run all tests
 go test ./...
-```
 
-### Run Tests with Coverage
+# Run with verbose output
+go test ./... -v
 
-```bash
+# Run with coverage
 go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-```
 
-### View Coverage Report
-
-```bash
+# View coverage report
 go tool cover -html=coverage.txt
 ```
 
-## Development
-
-### Project Structure
+## Project Structure
 
 ```
 .
-├── main.go                    # Main application entry point
+├── main.go                    # Application entry point and HTTP handlers
+├── main_test.go               # HTTP handler tests
 ├── pkg/
-│   ├── config.go             # Configuration management
-│   ├── schedulerService.go   # Core schedule calculation logic
-│   ├── template.go           # Template formatting functions
-│   ├── schedulerService_test.go
-│   ├── template_test.go
-│   └── template_bug_test.go  # Bug demonstration tests
+│   ├── config.go              # Configuration management
+│   ├── schedulerService.go    # Core schedule calculation logic
+│   ├── template.go            # Template formatting functions
+│   └── *_test.go              # Unit tests
 ├── templates/
-│   └── miaroSchedule.tmpl    # HTML template
-├── main_test.go              # HTTP handler tests
-├── Dockerfile                # Docker configuration
+│   └── miaroSchedule.tmpl     # HTML template (Bootswatch Lux theme)
+├── scripts/
+│   ├── deploy.sh              # Build and deploy script
+│   └── miaro-scheduler-api.service  # Systemd service file
 ├── .github/
 │   └── workflows/
-│       └── ci.yml           # GitHub Actions CI/CD
+│       └── ci.yml             # GitHub Actions CI/CD
 └── README.md
-
 ```
 
-### Key Components
+## UI Theme
 
-- **CalculateSchedule**: Determines the current day in the 10-day cycle
-- **FormatScheduleBeautified**: Converts schedule data to human-readable French text
-- **Config**: Manages application configuration from environment variables
-- **Middleware**: Structured logging and CORS support
+The HTML dashboard uses the [Bootswatch Lux](https://bootswatch.com/lux/) theme with:
+- Dark gradient background
+- Clean card-based layout
+- Status indicators with glow effects
+- Visual calendar grid with shift indicators
+- Responsive design for mobile devices
 
 ## CI/CD
 
-The project includes a GitHub Actions workflow that:
+GitHub Actions workflow runs on push/PR to main and dev branches:
 
-- ✅ Runs tests with race detection
-- 📊 Generates coverage reports
-- 🔍 Runs linting (golangci-lint)
-- 🏗️ Builds the application
-- 🐳 Builds Docker images on push to main/dev
-
-## Recent Improvements
-
-- ✅ Fixed critical bug in `nextWorkingDay()` function (modulo wrap-around)
-- ✅ Fixed timezone inconsistency in schedule calculations
-- ✅ Added proper error handling for timezone loading
-- ✅ Exported Schedule struct fields for better API usability
-- ✅ Added comprehensive configuration management
-- ✅ Implemented structured logging with slog
-- ✅ Added health check and JSON API endpoints
-- ✅ Implemented CORS support
-- ✅ Added graceful shutdown
-- ✅ Updated all dependencies and fixed security vulnerabilities
-- ✅ Added comprehensive test coverage (including HTTP handler tests)
-- ✅ Created Docker support with health checks
-- ✅ Set up GitHub Actions CI/CD pipeline
-
-## License
-
-This project was created as a learning exercise to explore Go features such as datetime handling and templates.
+- Runs tests with race detection
+- Generates coverage reports (Codecov)
+- Runs linting (golangci-lint)
+- Builds the application
 
 ## Contributing
 
-Issues and pull requests are welcome! Please ensure:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Ensure tests pass: `go test ./...`
+5. Ensure code is formatted: `go fmt ./...`
+6. Submit a pull request
 
-1. All tests pass: `go test ./...`
-2. Code is formatted: `go fmt ./...`
-3. Linting passes: `golangci-lint run`
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
