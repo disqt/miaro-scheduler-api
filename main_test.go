@@ -84,8 +84,9 @@ func TestSchedulerHandler(t *testing.T) {
 	// Check for key HTML elements
 	expectedStrings := []string{
 		"<!DOCTYPE html>",
-		"Miaro est",
-		"il",
+		"Horaire de Miaro",
+		"Statut Actuel",
+		"Prochain Jour de Travail",
 	}
 
 	for _, expected := range expectedStrings {

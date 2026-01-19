@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"unicode"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -77,8 +78,22 @@ func setupRouter(config *pkg.Config, logger *slog.Logger) *gin.Engine {
 		logger.Info("CORS enabled")
 	}
 
-	// Parse the templates from the embedded filesystem
-	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*.tmpl"))
+	// Create custom template functions
+	funcMap := template.FuncMap{
+		"title": func(s string) string {
+			// Title case function for French text
+			if s == "" {
+				return s
+			}
+			// Convert first character to uppercase
+			runes := []rune(s)
+			runes[0] = unicode.ToUpper(runes[0])
+			return string(runes)
+		},
+	}
+
+	// Parse the templates from the embedded filesystem with custom functions
+	tmpl := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*.tmpl"))
 	router.SetHTMLTemplate(tmpl)
 
 	// Define routes
