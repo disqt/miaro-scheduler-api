@@ -1,0 +1,31 @@
+[Unit]
+Description=Miaro Scheduler API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/miaro-scheduler-api
+ExecStart=/opt/miaro-scheduler-api/miaro-scheduler-api
+Restart=always
+RestartSec=5
+
+# Environment
+Environment=PORT=8081
+Environment=TIMEZONE=Europe/Paris
+Environment=ENABLE_CORS=false
+
+# Logging (stdout/stderr go to journald)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=miaro-scheduler-api
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/miaro-scheduler-api
+
+[Install]
+WantedBy=multi-user.target
