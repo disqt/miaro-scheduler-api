@@ -6,343 +6,482 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horaire de Miaro - Scheduler API</title>
+
+    <!-- Bootswatch Lux Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --lux-primary: #1a1a1a;
+            --lux-success: #4bbf73;
+            --lux-info: #1f9bcf;
+            --lux-warning: #f0ad4e;
+            --lux-danger: #d9534f;
+            --lux-light: #f0f1f2;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            line-height: 1.6;
+            padding: 2rem 1rem;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            flex: 1;
+            max-width: 1000px;
         }
 
-        header {
+        /* Header */
+        .page-header {
             text-align: center;
-            margin-bottom: 40px;
             color: white;
+            margin-bottom: 3rem;
         }
 
-        header h1 {
-            font-size: 2.5em;
-            margin: 0 0 10px 0;
+        .page-header h1 {
+            font-size: 2.5rem;
             font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
         }
 
-        header .subtitle {
-            font-size: 1.1em;
-            opacity: 0.95;
+        .page-header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
             font-weight: 300;
         }
 
+        /* Cards */
         .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 32px;
-            margin-bottom: 24px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-        }
-
-        .card-title {
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #666;
-            margin: 0 0 20px 0;
+        .card-header {
+            background: var(--lux-primary);
+            color: white;
             font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* Status Badge */
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-size: 1.4em;
+            gap: 0.75rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 20px;
         }
 
         .status-badge.working {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
+            background: rgba(75, 191, 115, 0.15);
+            color: var(--lux-success);
+            border: 2px solid var(--lux-success);
         }
 
         .status-badge.not-working {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
+            background: rgba(217, 85, 79, 0.15);
+            color: var(--lux-danger);
+            border: 2px solid var(--lux-danger);
         }
 
-        .status-icon {
-            font-size: 1.5em;
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
         }
 
+        .status-badge.working .status-indicator {
+            background: var(--lux-success);
+            box-shadow: 0 0 8px var(--lux-success);
+        }
+
+        .status-badge.not-working .status-indicator {
+            background: var(--lux-danger);
+            box-shadow: 0 0 8px var(--lux-danger);
+        }
+
+        /* Schedule Info */
         .schedule-info {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-top: 16px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: var(--lux-light);
+            border-radius: 8px;
+            border-left: 4px solid;
         }
 
-        .schedule-icon {
-            font-size: 2.5em;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .schedule-details {
-            flex: 1;
-        }
-
-        .schedule-type {
-            font-size: 1.5em;
+        .schedule-details h3 {
+            font-size: 1.5rem;
             font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #333;
+            margin: 0 0 0.5rem 0;
         }
 
         .schedule-time {
-            font-size: 1.1em;
-            color: #666;
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        /* Shift Colors */
+        .shift-morning .schedule-info {
+            border-left-color: #f0ad4e;
+        }
+        .shift-morning .schedule-details h3 {
+            color: #f0ad4e;
+        }
+
+        .shift-afternoon .schedule-info {
+            border-left-color: #1f9bcf;
+        }
+        .shift-afternoon .schedule-details h3 {
+            color: #1f9bcf;
+        }
+
+        .shift-night .schedule-info {
+            border-left-color: #6f42c1;
+        }
+        .shift-night .schedule-details h3 {
+            color: #6f42c1;
+        }
+
+        .shift-free .schedule-info {
+            border-left-color: #4bbf73;
+        }
+        .shift-free .schedule-details h3 {
+            color: #4bbf73;
+        }
+
+        /* Calendar */
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
             margin: 0;
         }
 
-        /* Shift-specific colors */
-        .shift-morning .schedule-icon {
-            color: #ff8c00;
-        }
-        .shift-morning .schedule-info {
-            background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
-            border-left: 4px solid #ff8c00;
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
         }
 
-        .shift-afternoon .schedule-icon {
-            color: #4a90e2;
-        }
-        .shift-afternoon .schedule-info {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-left: 4px solid #4a90e2;
-        }
-
-        .shift-night .schedule-icon {
-            color: #5b4e8e;
-        }
-        .shift-night .schedule-info {
-            background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 100%);
-            border-left: 4px solid #5b4e8e;
-        }
-
-        .shift-free .schedule-icon {
-            color: #4caf50;
-        }
-        .shift-free .schedule-info {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left: 4px solid #4caf50;
-        }
-
-        .next-work-label {
-            font-size: 1.1em;
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 0.5rem;
             color: #666;
-            margin: 0 0 8px 0;
         }
 
-        .next-work-date {
-            font-size: 1.6em;
-            font-weight: 700;
-            color: #333;
-            margin: 0 0 20px 0;
-        }
-
-        .info-note {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 16px 20px;
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             border-radius: 8px;
-            margin-top: 24px;
-            font-size: 0.95em;
-            color: #856404;
+            background: var(--lux-light);
+            font-size: 0.875rem;
+            position: relative;
+            cursor: default;
+            transition: transform 0.2s;
         }
 
-        .info-note-icon {
-            font-weight: bold;
-            margin-right: 8px;
+        .calendar-day:not(.empty):hover {
+            transform: scale(1.05);
         }
 
+        .calendar-day.empty {
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            background: var(--lux-primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.next-work {
+            background: var(--lux-success);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(75, 191, 115, 0.4);
+        }
+
+        .calendar-day .day-number {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .calendar-day .shift-indicator {
+            font-size: 0.625rem;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Legend */
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.morning {
+            background: #f0ad4e;
+        }
+
+        .legend-color.afternoon {
+            background: #1f9bcf;
+        }
+
+        .legend-color.night {
+            background: #6f42c1;
+        }
+
+        .legend-color.free {
+            background: #4bbf73;
+        }
+
+        /* Footer */
         footer {
             text-align: center;
-            margin-top: 40px;
-            padding: 20px 0;
-            color: white;
-            font-size: 0.9em;
+            margin-top: 3rem;
+            padding: 2rem 0;
         }
 
         footer a {
-            color: white;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            opacity: 0.9;
-            transition: opacity 0.2s;
+            font-size: 0.875rem;
+            transition: color 0.2s;
         }
 
         footer a:hover {
-            opacity: 1;
-            text-decoration: underline;
+            color: white;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: 12px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
             }
 
-            header h1 {
-                font-size: 1.8em;
+            .card-body {
+                padding: 1.5rem;
             }
 
-            .card {
-                padding: 20px;
+            .calendar-day-header {
+                font-size: 0.625rem;
+                padding: 0.25rem;
             }
 
-            .status-badge {
-                font-size: 1.1em;
-                padding: 12px 16px;
+            .calendar-day .day-number {
+                font-size: 0.875rem;
             }
 
-            .schedule-info {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .schedule-type {
-                font-size: 1.2em;
-            }
-
-            .next-work-date {
-                font-size: 1.3em;
+            .calendar-day .shift-indicator {
+                font-size: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📅 Horaire de Miaro</h1>
+        <header class="page-header">
+            <h1>Horaire de Miaro</h1>
             <div class="subtitle">Suivi en temps réel du planning de travail</div>
         </header>
 
         <main>
             <!-- Current Status Card -->
-            <article class="card">
-                <h2 class="card-title">Statut Actuel</h2>
+            <div class="card">
+                <div class="card-header">Statut Actuel</div>
+                <div class="card-body">
+                    <div class="status-container">
+                        {{ if eq .IsWorking "est au travail" }}
+                        <div class="status-badge working">
+                            <span class="status-indicator"></span>
+                            <span>Au travail</span>
+                        </div>
+                        {{ else }}
+                        <div class="status-badge not-working">
+                            <span class="status-indicator"></span>
+                            <span>Pas au travail</span>
+                        </div>
+                        {{ end }}
+                    </div>
 
-                {{ if eq .IsWorking "est au travail" }}
-                <div class="status-badge working">
-                    <span class="status-icon">✓</span>
-                    <span>Au travail</span>
+                    {{ if eq .Schedule "du matin" }}
+                    <div class="shift-morning">
+                        <div class="schedule-info">
+                            <div class="schedule-details">
+                                <h3>Équipe du Matin</h3>
+                                <p class="schedule-time">06:00 - 14:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{ else if eq .Schedule "de l'après-midi" }}
+                    <div class="shift-afternoon">
+                        <div class="schedule-info">
+                            <div class="schedule-details">
+                                <h3>Équipe de l'Après-midi</h3>
+                                <p class="schedule-time">14:00 - 22:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{ else if eq .Schedule "de nuit" }}
+                    <div class="shift-night">
+                        <div class="schedule-info">
+                            <div class="schedule-details">
+                                <h3>Équipe de Nuit</h3>
+                                <p class="schedule-time">22:00 - 06:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{ else if eq .Schedule "libre" }}
+                    <div class="shift-free">
+                        <div class="schedule-info">
+                            <div class="schedule-details">
+                                <h3>Jour de Repos</h3>
+                                <p class="schedule-time">Temps libre</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
                 </div>
-                {{ else }}
-                <div class="status-badge not-working">
-                    <span class="status-icon">○</span>
-                    <span>Pas au travail</span>
-                </div>
-                {{ end }}
+            </div>
 
-                {{ if eq .Schedule "du matin" }}
-                <div class="schedule-info shift-morning">
-                    <div class="schedule-icon">☀️</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe du Matin</p>
-                        <p class="schedule-time">⏰ 6h00 - 14h00</p>
+            <!-- Calendar View Card -->
+            <div class="card">
+                <div class="card-header">Planning du Mois</div>
+                <div class="card-body">
+                    <div class="calendar-header">
+                        <h3>Prochain jour de travail: {{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</h3>
                     </div>
-                </div>
-                {{ else if eq .Schedule "de l'après-midi" }}
-                <div class="schedule-info shift-afternoon">
-                    <div class="schedule-icon">🌤️</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe de l'Après-midi</p>
-                        <p class="schedule-time">⏰ 14h00 - 22h00</p>
-                    </div>
-                </div>
-                {{ else if eq .Schedule "de nuit" }}
-                <div class="schedule-info shift-night">
-                    <div class="schedule-icon">🌙</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe de Nuit</p>
-                        <p class="schedule-time">⏰ 22h00 - 6h00</p>
-                    </div>
-                </div>
-                {{ else if eq .Schedule "libre" }}
-                <div class="schedule-info shift-free">
-                    <div class="schedule-icon">🏖️</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Jour de Repos</p>
-                        <p class="schedule-time">✨ Temps libre</p>
-                    </div>
-                </div>
-                {{ end }}
-            </article>
 
-            <!-- Next Working Day Card -->
-            <article class="card">
-                <h2 class="card-title">Prochain Jour de Travail</h2>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Lun</div>
+                        <div class="calendar-day-header">Mar</div>
+                        <div class="calendar-day-header">Mer</div>
+                        <div class="calendar-day-header">Jeu</div>
+                        <div class="calendar-day-header">Ven</div>
+                        <div class="calendar-day-header">Sam</div>
+                        <div class="calendar-day-header">Dim</div>
 
-                <p class="next-work-label">📅 Date</p>
-                <p class="next-work-date">{{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</p>
+                        <!-- Sample calendar days - in production, this would be dynamically generated -->
+                        <div class="calendar-day empty"></div>
+                        <div class="calendar-day empty"></div>
+                        <div class="calendar-day empty"></div>
+                        <div class="calendar-day">
+                            <div class="day-number">1</div>
+                            <div class="shift-indicator">Matin</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">2</div>
+                            <div class="shift-indicator">Matin</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">3</div>
+                            <div class="shift-indicator">Libre</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">4</div>
+                            <div class="shift-indicator">Libre</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">5</div>
+                            <div class="shift-indicator">Soir</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">6</div>
+                            <div class="shift-indicator">Soir</div>
+                        </div>
+                        <div class="calendar-day today">
+                            <div class="day-number">7</div>
+                            <div class="shift-indicator">Soir</div>
+                        </div>
+                        <div class="calendar-day next-work">
+                            <div class="day-number">8</div>
+                            <div class="shift-indicator">Nuit</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">9</div>
+                            <div class="shift-indicator">Nuit</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">10</div>
+                            <div class="shift-indicator">Libre</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">11</div>
+                            <div class="shift-indicator">Libre</div>
+                        </div>
+                    </div>
 
-                {{ if eq .ScheduleNextWorkingDay "du matin" }}
-                <div class="schedule-info shift-morning">
-                    <div class="schedule-icon">☀️</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe du Matin</p>
-                        <p class="schedule-time">⏰ 6h00 - 14h00</p>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-color morning"></div>
+                            <span>Matin</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color afternoon"></div>
+                            <span>Après-midi</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color night"></div>
+                            <span>Nuit</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color free"></div>
+                            <span>Libre</span>
+                        </div>
                     </div>
                 </div>
-                {{ else if eq .ScheduleNextWorkingDay "de l'après-midi" }}
-                <div class="schedule-info shift-afternoon">
-                    <div class="schedule-icon">🌤️</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe de l'Après-midi</p>
-                        <p class="schedule-time">⏰ 14h00 - 22h00</p>
-                    </div>
-                </div>
-                {{ else if eq .ScheduleNextWorkingDay "de nuit" }}
-                <div class="schedule-info shift-night">
-                    <div class="schedule-icon">🌙</div>
-                    <div class="schedule-details">
-                        <p class="schedule-type">Équipe de Nuit</p>
-                        <p class="schedule-time">⏰ 22h00 - 6h00</p>
-                    </div>
-                </div>
-                {{ end }}
-
-                <div class="info-note">
-                    <span class="info-note-icon">ℹ️</span>
-                    <span>Ces informations sont calculées selon le cycle habituel. Des exceptions peuvent s'appliquer.</span>
-                </div>
-            </article>
+            </div>
         </main>
 
         <footer>
