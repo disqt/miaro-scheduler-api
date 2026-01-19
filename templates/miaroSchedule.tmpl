@@ -412,54 +412,14 @@
                         <div class="calendar-day-header">Sam</div>
                         <div class="calendar-day-header">Dim</div>
 
-                        <!-- Sample calendar days - in production, this would be dynamically generated -->
-                        <div class="calendar-day empty"></div>
-                        <div class="calendar-day empty"></div>
-                        <div class="calendar-day empty"></div>
-                        <div class="calendar-day">
-                            <div class="day-number">1</div>
-                            <div class="shift-indicator">Matin</div>
+                        {{ range .CalendarDays }}
+                        <div class="calendar-day {{ if .IsEmpty }}empty{{ end }} {{ if .IsToday }}today{{ end }} {{ if .IsNextWork }}next-work{{ end }}">
+                            {{ if not .IsEmpty }}
+                            <div class="day-number">{{ .DayNumber }}</div>
+                            <div class="shift-indicator">{{ .ShiftType }}</div>
+                            {{ end }}
                         </div>
-                        <div class="calendar-day">
-                            <div class="day-number">2</div>
-                            <div class="shift-indicator">Matin</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">3</div>
-                            <div class="shift-indicator">Libre</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">4</div>
-                            <div class="shift-indicator">Libre</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">5</div>
-                            <div class="shift-indicator">Soir</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">6</div>
-                            <div class="shift-indicator">Soir</div>
-                        </div>
-                        <div class="calendar-day today">
-                            <div class="day-number">7</div>
-                            <div class="shift-indicator">Soir</div>
-                        </div>
-                        <div class="calendar-day next-work">
-                            <div class="day-number">8</div>
-                            <div class="shift-indicator">Nuit</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">9</div>
-                            <div class="shift-indicator">Nuit</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">10</div>
-                            <div class="shift-indicator">Libre</div>
-                        </div>
-                        <div class="calendar-day">
-                            <div class="day-number">11</div>
-                            <div class="shift-indicator">Libre</div>
-                        </div>
+                        {{ end }}
                     </div>
 
                     <div class="calendar-legend">
