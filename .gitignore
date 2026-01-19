@@ -30,3 +30,6 @@ go.work.sum
 
 # coverage files
 coverage.txt
+
+# preview files
+preview.html
