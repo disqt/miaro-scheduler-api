@@ -87,6 +87,7 @@ func TestSchedulerHandler(t *testing.T) {
 		"Horaire de Miaro",
 		"Statut Actuel",
 		"Planning du Mois",
+		"Prochain jour de travail",
 	}
 
 	for _, expected := range expectedStrings {

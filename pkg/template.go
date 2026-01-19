@@ -1,13 +1,28 @@
 package pkg
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // ScheduleBeautified contains human-readable French text representations of the schedule information.
 type ScheduleBeautified struct {
-	Schedule               string // e.g., "du matin", "de l'après-midi", "de nuit", "libre"
-	IsWorking              string // e.g., "est au travail", "n'est pas au travail"
-	ScheduleNextWorkingDay string // e.g., "du matin" (for the next working day)
-	NextWorkingDay         string // e.g., "demain", "dans 3 jours"
+	Schedule               string       // e.g., "du matin", "de l'après-midi", "de nuit", "libre"
+	IsWorking              string       // e.g., "est au travail", "n'est pas au travail"
+	ScheduleNextWorkingDay string       // e.g., "du matin" (for the next working day)
+	NextWorkingDay         string       // e.g., "demain", "dans 3 jours"
+	CalendarDays           []CalendarDay // Calendar data for the month
+}
+
+// CalendarDay represents a single day in the calendar view
+type CalendarDay struct {
+	DayNumber     int    // Day of the month (1-31)
+	ShiftType     string // "Matin", "Après-midi", "Nuit", "Libre"
+	IsToday       bool   // True if this is today
+	IsNextWork    bool   // True if this is the next working day
+	IsEmpty       bool   // True for empty cells at start/end of month
+	ShiftClass    string // CSS class: "morning", "afternoon", "night", "free"
+	IsCurrentWeek bool   // True if this day is in the current week
 }
 
 // FormatScheduleBeautified converts a Schedule into human-readable French text.
@@ -20,11 +35,22 @@ func FormatScheduleBeautified(schedule Schedule) ScheduleBeautified {
 
 	scheduleNextWorkingDay, nextWorkingDay := nextWorkingDay(schedule.DayInSchedule)
 
+	// Extract number of days from nextWorkingDay string
+	var nextWorkDays int
+	if nextWorkingDay == "demain" {
+		nextWorkDays = 1
+	} else {
+		fmt.Sscanf(nextWorkingDay, "dans %d jours", &nextWorkDays)
+	}
+
+	calendarDays := GenerateCalendarData(schedule, nextWorkDays)
+
 	return ScheduleBeautified{
 		Schedule:               currentDay,
 		IsWorking:              isWorking,
 		ScheduleNextWorkingDay: scheduleNextWorkingDay,
 		NextWorkingDay:         nextWorkingDay,
+		CalendarDays:           calendarDays,
 	}
 }
 
@@ -83,4 +109,66 @@ func nextWorkingDay(day int) (string, string) {
 	}
 
 	return getBeautifiedSchedule(schedule[(day+i)%10]), nextWorkingDay
+}
+
+// GenerateCalendarData generates calendar data for the current month
+func GenerateCalendarData(currentSchedule Schedule, nextWorkDays int) []CalendarDay {
+	loc, _ := time.LoadLocation("Europe/Paris")
+	now := currentSchedule.TimeRequested.In(loc)
+
+	// Get first and last day of current month
+	year, month, _ := now.Date()
+	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, loc)
+	lastDay := firstDay.AddDate(0, 1, -1)
+
+	// Calculate weekday offset (Monday = 0, Sunday = 6)
+	weekdayOffset := int(firstDay.Weekday()) - 1
+	if weekdayOffset == -1 {
+		weekdayOffset = 6
+	}
+
+	var calendarDays []CalendarDay
+
+	// Add empty cells for days before month starts
+	for i := 0; i < weekdayOffset; i++ {
+		calendarDays = append(calendarDays, CalendarDay{IsEmpty: true})
+	}
+
+	// Add actual days of the month
+	for day := 1; day <= lastDay.Day(); day++ {
+		currentDate := time.Date(year, month, day, 12, 0, 0, 0, loc)
+		daySchedule := CalculateSchedule(currentDate)
+
+		isToday := day == now.Day()
+		isNextWork := !isToday && daySchedule.ScheduleType != FREE &&
+			(currentDate.After(now) || currentDate.Equal(now)) &&
+			day == now.Day()+nextWorkDays
+
+		var shiftType, shiftClass string
+		switch daySchedule.ScheduleType {
+		case MORNING:
+			shiftType = "Matin"
+			shiftClass = "morning"
+		case AFTERNOON:
+			shiftType = "Soir"
+			shiftClass = "afternoon"
+		case NIGHT:
+			shiftType = "Nuit"
+			shiftClass = "night"
+		case FREE:
+			shiftType = "Libre"
+			shiftClass = "free"
+		}
+
+		calendarDays = append(calendarDays, CalendarDay{
+			DayNumber:  day,
+			ShiftType:  shiftType,
+			IsToday:    isToday,
+			IsNextWork: isNextWork,
+			IsEmpty:    false,
+			ShiftClass: shiftClass,
+		})
+	}
+
+	return calendarDays
 }
