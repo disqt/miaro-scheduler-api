@@ -1,0 +1,394 @@
+{{ define "design-09-gradient-saas.tmpl" }}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horaire de Miaro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --morning: #f59e0b;
+            --afternoon: #06b6d4;
+            --night: #8b5cf6;
+            --free: #10b981;
+        }
+
+        body {
+            font-family: 'Sora', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #ec4899);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-value.working {
+            color: #10b981;
+        }
+
+        .stat-value.resting {
+            color: #f43f5e;
+        }
+
+        .stat-sub {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 0.25rem;
+        }
+
+        .shift-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .shift-badge.morning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--morning);
+        }
+
+        .shift-badge.afternoon {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--afternoon);
+        }
+
+        .shift-badge.night {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--night);
+        }
+
+        .shift-badge.free {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--free);
+        }
+
+        .calendar-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .next-pill {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day-header {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:not(.empty):hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .calendar-day.next-work {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3));
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .day-number {
+            font-weight: 600;
+        }
+
+        .shift-indicator {
+            font-size: 0.5625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            opacity: 0.5;
+            margin-top: 2px;
+        }
+
+        .calendar-day.today .shift-indicator,
+        .calendar-day.next-work .shift-indicator {
+            opacity: 0.8;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.morning { background: var(--morning); }
+        .legend-dot.afternoon { background: var(--afternoon); }
+        .legend-dot.night { background: var(--night); }
+        .legend-dot.free { background: var(--free); }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8125rem;
+        }
+
+        footer a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .calendar-day {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                <h1>Miaro Schedule</h1>
+            </div>
+            <p class="subtitle">Dashboard de suivi en temps réel</p>
+        </header>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Statut</div>
+                {{ if eq .IsWorking "est au travail" }}
+                <div class="stat-value working">En ligne</div>
+                <div class="stat-sub">Actuellement au travail</div>
+                {{ else }}
+                <div class="stat-value resting">Hors ligne</div>
+                <div class="stat-sub">Pas au travail</div>
+                {{ end }}
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Équipe</div>
+                {{ if eq .Schedule "du matin" }}
+                <div class="stat-value">Matin</div>
+                <div class="shift-badge morning">06:00 – 14:00</div>
+                {{ else if eq .Schedule "de l'après-midi" }}
+                <div class="stat-value">Après-midi</div>
+                <div class="shift-badge afternoon">14:00 – 22:00</div>
+                {{ else if eq .Schedule "de nuit" }}
+                <div class="stat-value">Nuit</div>
+                <div class="shift-badge night">22:00 – 06:00</div>
+                {{ else }}
+                <div class="stat-value">Libre</div>
+                <div class="shift-badge free">Jour de repos</div>
+                {{ end }}
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Prochain travail</div>
+                <div class="stat-value">{{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</div>
+                <div class="stat-sub">Équipe {{ .ScheduleNextWorkingDay }}</div>
+            </div>
+        </div>
+
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <h2>Planning du mois</h2>
+                <span class="next-pill">Vue calendrier</span>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="calendar-day-header">Lun</div>
+                <div class="calendar-day-header">Mar</div>
+                <div class="calendar-day-header">Mer</div>
+                <div class="calendar-day-header">Jeu</div>
+                <div class="calendar-day-header">Ven</div>
+                <div class="calendar-day-header">Sam</div>
+                <div class="calendar-day-header">Dim</div>
+
+                {{ range .CalendarDays }}
+                <div class="calendar-day {{ if .IsEmpty }}empty{{ end }} {{ if .IsToday }}today{{ end }} {{ if .IsNextWork }}next-work{{ end }}">
+                    {{ if not .IsEmpty }}
+                    <div class="day-number">{{ .DayNumber }}</div>
+                    <div class="shift-indicator">{{ .ShiftType }}</div>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot morning"></div> Matin</div>
+                <div class="legend-item"><div class="legend-dot afternoon"></div> Après-midi</div>
+                <div class="legend-item"><div class="legend-dot night"></div> Nuit</div>
+                <div class="legend-item"><div class="legend-dot free"></div> Libre</div>
+            </div>
+        </div>
+
+        <footer>
+            <a href="https://github.com/disqt/miaro-scheduler-api">Miaro Scheduler API</a>
+        </footer>
+    </div>
+</body>
+</html>
+{{ end }}
