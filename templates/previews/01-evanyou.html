@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design 01: Evan You Style</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f5f2eb; --text: #1a1a1a; --text-muted: #666; --accent: #42b883;
+            --morning: #d4a574; --afternoon: #5c9ead; --night: #7c6c9a; --free: #7fb069;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 4rem 2rem; min-height: 100vh; }
+        .container { max-width: 680px; margin: 0 auto; }
+        h1 { font-family: 'Newsreader', Georgia, serif; font-style: italic; font-weight: 400; font-size: 3.5rem; margin-bottom: 2rem; letter-spacing: -0.02em; }
+        .status-line { font-size: 1.125rem; margin-bottom: 1.5rem; }
+        .status-line strong { color: var(--accent); }
+        a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(66, 184, 131, 0.3); text-underline-offset: 3px; }
+        .schedule-section { margin: 3rem 0; padding: 2rem 0; border-top: 1px solid rgba(0,0,0,0.1); }
+        .schedule-title { font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-muted); }
+        .shift-info { font-size: 1.125rem; }
+        .shift-name { font-weight: 600; }
+        .shift-name.morning { color: var(--morning); }
+        .calendar-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.1); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-top: 1.5rem; }
+        .calendar-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); text-align: center; padding: 0.5rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.875rem; transition: background 0.2s; }
+        .calendar-day:not(.empty):hover { background: rgba(0,0,0,0.05); }
+        .calendar-day.empty { visibility: hidden; }
+        .calendar-day.today { background: var(--text); color: var(--bg); font-weight: 600; }
+        .calendar-day.next-work { background: var(--accent); color: white; font-weight: 600; }
+        .day-number { font-weight: 500; }
+        .shift-indicator { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.7; margin-top: 2px; }
+        .legend { display: flex; gap: 1.5rem; margin-top: 2rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-dot.morning { background: var(--morning); }
+        .legend-dot.afternoon { background: var(--afternoon); }
+        .legend-dot.night { background: var(--night); }
+        .legend-dot.free { background: var(--free); }
+        footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.875rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Miaro</h1>
+        <p class="status-line">Miaro <strong>est actuellement au travail</strong>.</p>
+        <div class="schedule-section">
+            <div class="schedule-title">Équipe actuelle</div>
+            <p class="shift-info">Travaille avec l'<span class="shift-name morning">équipe du matin</span> (06:00 - 14:00)</p>
+        </div>
+        <p class="status-line">Prochain jour de travail : <strong>dans 2 jours</strong></p>
+        <div class="calendar-section">
+            <div class="schedule-title">Planning du mois</div>
+            <div class="calendar-grid">
+                <div class="calendar-header">Lun</div>
+                <div class="calendar-header">Mar</div>
+                <div class="calendar-header">Mer</div>
+                <div class="calendar-header">Jeu</div>
+                <div class="calendar-header">Ven</div>
+                <div class="calendar-header">Sam</div>
+                <div class="calendar-header">Dim</div>
+                <div class="calendar-day empty"></div>
+                <div class="calendar-day empty"></div>
+                <div class="calendar-day"><div class="day-number">1</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">2</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">3</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">4</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">5</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">6</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">7</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">8</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">9</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">10</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">11</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">12</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day today"><div class="day-number">13</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">14</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day next-work"><div class="day-number">15</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">16</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">17</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">18</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">19</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">20</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">21</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">22</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">23</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">24</div><div class="shift-indicator">Matin</div></div>
+                <div class="calendar-day"><div class="day-number">25</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">26</div><div class="shift-indicator">Soir</div></div>
+                <div class="calendar-day"><div class="day-number">27</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">28</div><div class="shift-indicator">Nuit</div></div>
+                <div class="calendar-day"><div class="day-number">29</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">30</div><div class="shift-indicator">Libre</div></div>
+                <div class="calendar-day"><div class="day-number">31</div><div class="shift-indicator">Matin</div></div>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot morning"></div> Matin</div>
+                <div class="legend-item"><div class="legend-dot afternoon"></div> Après-midi</div>
+                <div class="legend-item"><div class="legend-dot night"></div> Nuit</div>
+                <div class="legend-item"><div class="legend-dot free"></div> Repos</div>
+            </div>
+        </div>
+        <footer><a href="#">Miaro Scheduler API</a> · 2024</footer>
+    </div>
+</body>
+</html>
