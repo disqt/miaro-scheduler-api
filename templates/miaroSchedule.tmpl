@@ -5,413 +5,540 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horaire de Miaro - Scheduler API</title>
-
-    <!-- Bootswatch Lux Theme -->
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css" rel="stylesheet">
-
+    <title>Horaire de Miaro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --lux-primary: #1a1a1a;
-            --lux-success: #4bbf73;
-            --lux-info: #1f9bcf;
-            --lux-warning: #f0ad4e;
-            --lux-danger: #d9534f;
-            --lux-light: #f0f1f2;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        /* ============================================
+           THEME: NEUMORPHISM (Default)
+           ============================================ */
+        body.theme-neumorphism {
+            --bg: #e8eef3;
+            --text: #2d3748;
+            --text-muted: #718096;
+            --shadow-light: #ffffff;
+            --shadow-dark: #c8d0d9;
+            --accent: #6c63ff;
+            --morning: #f6ad55;
+            --afternoon: #4299e1;
+            --night: #9f7aea;
+            --free: #48bb78;
+            font-family: 'Nunito', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 2rem 1rem;
-        }
-
-        .container {
-            max-width: 1000px;
-        }
-
-        /* Header */
-        .page-header {
-            text-align: center;
-            color: white;
-            margin-bottom: 3rem;
-        }
-
-        .page-header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .page-header .subtitle {
-            font-size: 1rem;
-            opacity: 0.8;
-            font-weight: 300;
-        }
-
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: var(--lux-primary);
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 1rem 1.5rem;
-            border: none;
-        }
-
-        .card-body {
             padding: 2rem;
         }
 
-        /* Status Badge */
-        .status-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
+        body.theme-neumorphism .container { max-width: 900px; margin: 0 auto; }
+
+        body.theme-neumorphism .neu {
+            background: var(--bg);
+            border-radius: 24px;
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
         }
 
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.875rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1.25rem;
-            font-weight: 600;
+        body.theme-neumorphism .neu-inset {
+            background: var(--bg);
+            border-radius: 16px;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
         }
 
-        .status-badge.working {
-            background: rgba(75, 191, 115, 0.15);
-            color: var(--lux-success);
-            border: 2px solid var(--lux-success);
+        body.theme-neumorphism header { text-align: center; padding: 2.5rem; margin-bottom: 2rem; }
+        body.theme-neumorphism h1 { font-size: 2rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+        body.theme-neumorphism .subtitle { color: var(--text-muted); font-size: 0.9375rem; }
+
+        body.theme-neumorphism .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        body.theme-neumorphism .card { padding: 2rem; }
+        body.theme-neumorphism .card-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1rem; }
+
+        body.theme-neumorphism .status-display { display: flex; align-items: center; gap: 1rem; }
+        body.theme-neumorphism .status-orb {
+            width: 56px; height: 56px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        }
+        body.theme-neumorphism .status-orb.working { background: linear-gradient(145deg, #4ade80, #22c55e); color: white; }
+        body.theme-neumorphism .status-orb.resting { background: linear-gradient(145deg, #f87171, #ef4444); color: white; }
+        body.theme-neumorphism .status-info h3 { font-size: 1.25rem; font-weight: 700; }
+        body.theme-neumorphism .status-info p { font-size: 0.875rem; color: var(--text-muted); }
+
+        body.theme-neumorphism .shift-display { padding: 1.25rem; }
+        body.theme-neumorphism .shift-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+        body.theme-neumorphism .shift-name.morning { color: var(--morning); }
+        body.theme-neumorphism .shift-name.afternoon { color: var(--afternoon); }
+        body.theme-neumorphism .shift-name.night { color: var(--night); }
+        body.theme-neumorphism .shift-name.free { color: var(--free); }
+        body.theme-neumorphism .shift-time { font-size: 0.875rem; color: var(--text-muted); }
+
+        body.theme-neumorphism .calendar-card { padding: 2rem; }
+        body.theme-neumorphism .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        body.theme-neumorphism .calendar-header h2 { font-size: 1rem; font-weight: 700; }
+        body.theme-neumorphism .next-badge {
+            padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--accent);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
         }
 
-        .status-badge.not-working {
-            background: rgba(217, 85, 79, 0.15);
-            color: var(--lux-danger);
-            border: 2px solid var(--lux-danger);
+        body.theme-neumorphism .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.625rem; }
+        body.theme-neumorphism .calendar-day-header {
+            font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-muted); text-align: center; padding: 0.5rem; font-weight: 600;
+        }
+        body.theme-neumorphism .calendar-day {
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 12px; font-size: 0.875rem; transition: all 0.2s ease; cursor: default;
+            background: var(--bg);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        }
+        body.theme-neumorphism .calendar-day:not(.empty):hover {
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+        body.theme-neumorphism .calendar-day.empty { box-shadow: none; background: transparent; }
+        body.theme-neumorphism .calendar-day.today {
+            background: var(--text); color: white;
+            box-shadow: 4px 4px 12px rgba(45, 55, 72, 0.3), -4px -4px 8px var(--shadow-light);
+        }
+        body.theme-neumorphism .calendar-day.next-work {
+            background: linear-gradient(145deg, var(--accent), #5a52d5); color: white;
+            box-shadow: 4px 4px 12px rgba(108, 99, 255, 0.3), -4px -4px 8px var(--shadow-light);
+        }
+        body.theme-neumorphism .day-number { font-weight: 700; }
+        body.theme-neumorphism .shift-indicator { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.02em; opacity: 0.7; margin-top: 2px; }
+        body.theme-neumorphism .calendar-day.today .shift-indicator,
+        body.theme-neumorphism .calendar-day.next-work .shift-indicator { opacity: 0.9; }
+
+        body.theme-neumorphism .legend { display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem; flex-wrap: wrap; }
+        body.theme-neumorphism .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+        body.theme-neumorphism .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+        body.theme-neumorphism .legend-dot.morning { background: var(--morning); }
+        body.theme-neumorphism .legend-dot.afternoon { background: var(--afternoon); }
+        body.theme-neumorphism .legend-dot.night { background: var(--night); }
+        body.theme-neumorphism .legend-dot.free { background: var(--free); }
+
+        body.theme-neumorphism footer { margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.8125rem; }
+        body.theme-neumorphism footer a { color: var(--accent); text-decoration: none; }
+
+        @media (max-width: 640px) {
+            body.theme-neumorphism .cards-row { grid-template-columns: 1fr; }
+            body.theme-neumorphism .calendar-grid { gap: 0.375rem; }
+            body.theme-neumorphism .calendar-day { font-size: 0.75rem; border-radius: 8px; }
         }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .status-badge.working .status-indicator {
-            background: var(--lux-success);
-            box-shadow: 0 0 8px var(--lux-success);
-        }
-
-        .status-badge.not-working .status-indicator {
-            background: var(--lux-danger);
-            box-shadow: 0 0 8px var(--lux-danger);
-        }
-
-        /* Schedule Info */
-        .schedule-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
+        /* ============================================
+           THEME: BENTO
+           ============================================ */
+        body.theme-bento {
+            --bg: #f8fafc;
+            --card-bg: white;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #6366f1;
+            --morning: #f97316;
+            --afternoon: #0ea5e9;
+            --night: #8b5cf6;
+            --free: #22c55e;
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
             padding: 1.5rem;
-            background: var(--lux-light);
-            border-radius: 8px;
-            border-left: 4px solid;
         }
 
-        .schedule-details h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
+        body.theme-bento .container { max-width: 1000px; margin: 0 auto; }
+        body.theme-bento .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto auto auto; gap: 1rem; }
+        body.theme-bento .bento-item {
+            background: var(--card-bg); border-radius: 20px; padding: 1.5rem;
+            border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s;
         }
+        body.theme-bento .bento-item:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
 
-        .schedule-time {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin: 0;
-            font-family: 'Monaco', 'Courier New', monospace;
-        }
+        body.theme-bento .bento-title { grid-column: span 2; display: flex; flex-direction: column; justify-content: center; }
+        body.theme-bento .bento-title h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+        body.theme-bento .bento-title p { color: var(--text-muted); font-size: 0.9375rem; }
 
-        /* Shift Colors */
-        .shift-morning .schedule-info {
-            border-left-color: #f0ad4e;
+        body.theme-bento .bento-status { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        body.theme-bento .status-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; font-size: 1.5rem;
         }
-        .shift-morning .schedule-details h3 {
-            color: #f0ad4e;
-        }
+        body.theme-bento .status-circle.working { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3); }
+        body.theme-bento .status-circle.resting { background: linear-gradient(135deg, #f87171, #ef4444); color: white; }
+        body.theme-bento .status-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+        body.theme-bento .status-value { font-weight: 600; font-size: 1rem; margin-top: 0.25rem; }
 
-        .shift-afternoon .schedule-info {
-            border-left-color: #1f9bcf;
-        }
-        .shift-afternoon .schedule-details h3 {
-            color: #1f9bcf;
-        }
+        body.theme-bento .bento-shift { display: flex; flex-direction: column; justify-content: center; }
+        body.theme-bento .shift-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem; }
+        body.theme-bento .shift-name { font-size: 1.5rem; font-weight: 700; }
+        body.theme-bento .shift-name.morning { color: var(--morning); }
+        body.theme-bento .shift-name.afternoon { color: var(--afternoon); }
+        body.theme-bento .shift-name.night { color: var(--night); }
+        body.theme-bento .shift-name.free { color: var(--free); }
+        body.theme-bento .shift-time { color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem; }
 
-        .shift-night .schedule-info {
-            border-left-color: #6f42c1;
-        }
-        .shift-night .schedule-details h3 {
-            color: #6f42c1;
-        }
+        body.theme-bento .bento-calendar { grid-column: span 4; }
+        body.theme-bento .calendar-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        body.theme-bento .calendar-title h2 { font-size: 1rem; font-weight: 600; }
+        body.theme-bento .next-badge { background: var(--accent); color: white; padding: 0.375rem 0.875rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
 
-        .shift-free .schedule-info {
-            border-left-color: #4bbf73;
+        body.theme-bento .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+        body.theme-bento .calendar-header { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); text-align: center; padding: 0.5rem; }
+        body.theme-bento .calendar-day {
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 12px; background: var(--bg); font-size: 0.875rem; transition: all 0.15s ease;
         }
-        .shift-free .schedule-details h3 {
-            color: #4bbf73;
-        }
+        body.theme-bento .calendar-day:not(.empty):hover { background: #e2e8f0; }
+        body.theme-bento .calendar-day.empty { background: transparent; }
+        body.theme-bento .calendar-day.today { background: var(--text); color: white; font-weight: 700; }
+        body.theme-bento .calendar-day.next-work { background: var(--accent); color: white; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3); }
+        body.theme-bento .day-number { font-weight: 600; }
+        body.theme-bento .shift-indicator { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.02em; opacity: 0.6; margin-top: 2px; }
+        body.theme-bento .calendar-day.today .shift-indicator,
+        body.theme-bento .calendar-day.next-work .shift-indicator { opacity: 0.85; }
 
-        /* Calendar */
-        .calendar-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+        body.theme-bento .bento-legend { grid-column: span 4; display: flex; justify-content: center; gap: 2rem; padding: 1rem; }
+        body.theme-bento .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+        body.theme-bento .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        body.theme-bento .legend-color.morning { background: var(--morning); }
+        body.theme-bento .legend-color.afternoon { background: var(--afternoon); }
+        body.theme-bento .legend-color.night { background: var(--night); }
+        body.theme-bento .legend-color.free { background: var(--free); }
 
-        .calendar-header h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0;
-        }
+        body.theme-bento footer { text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.8125rem; }
+        body.theme-bento footer a { color: var(--accent); text-decoration: none; }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 0.5rem;
-            color: #666;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: var(--lux-light);
-            font-size: 0.875rem;
-            position: relative;
-            cursor: default;
-            transition: transform 0.2s;
-        }
-
-        .calendar-day:not(.empty):hover {
-            transform: scale(1.05);
-        }
-
-        .calendar-day.empty {
-            background: transparent;
-        }
-
-        .calendar-day.today {
-            background: var(--lux-primary);
-            color: white;
-            font-weight: 700;
-        }
-
-        .calendar-day.next-work {
-            background: var(--lux-success);
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 0 12px rgba(75, 191, 115, 0.4);
-        }
-
-        .calendar-day .day-number {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .calendar-day .shift-indicator {
-            font-size: 0.625rem;
-            margin-top: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Legend */
-        .calendar-legend {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-
-        .legend-color.morning {
-            background: #f0ad4e;
-        }
-
-        .legend-color.afternoon {
-            background: #1f9bcf;
-        }
-
-        .legend-color.night {
-            background: #6f42c1;
-        }
-
-        .legend-color.free {
-            background: #4bbf73;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem 0;
-        }
-
-        footer a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-size: 0.875rem;
-            transition: color 0.2s;
-        }
-
-        footer a:hover {
-            color: white;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .page-header h1 {
-                font-size: 2rem;
-            }
-
-            .card-body {
-                padding: 1.5rem;
-            }
-
-            .calendar-day-header {
-                font-size: 0.625rem;
-                padding: 0.25rem;
-            }
-
-            .calendar-day .day-number {
-                font-size: 0.875rem;
-            }
-
-            .calendar-day .shift-indicator {
-                font-size: 0.5rem;
-            }
+            body.theme-bento .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            body.theme-bento .bento-title { grid-column: span 2; }
+            body.theme-bento .bento-calendar { grid-column: span 2; }
+            body.theme-bento .bento-legend { grid-column: span 2; gap: 1rem; flex-wrap: wrap; }
         }
+        @media (max-width: 480px) {
+            body.theme-bento .bento-title, body.theme-bento .bento-status, body.theme-bento .bento-shift { grid-column: span 2; }
+        }
+
+        /* ============================================
+           THEME: TERMINAL
+           ============================================ */
+        body.theme-terminal {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --green: #3fb950;
+            --red: #f85149;
+            --yellow: #d29922;
+            --blue: #58a6ff;
+            --purple: #a371f7;
+            --cyan: #39c5cf;
+            font-family: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+            font-size: 14px;
+        }
+
+        body.theme-terminal .terminal { max-width: 900px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        body.theme-terminal .terminal-header { background: var(--bg); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border); }
+        body.theme-terminal .terminal-buttons { display: flex; gap: 0.5rem; }
+        body.theme-terminal .terminal-btn { width: 12px; height: 12px; border-radius: 50%; }
+        body.theme-terminal .terminal-btn.close { background: #ff5f56; }
+        body.theme-terminal .terminal-btn.minimize { background: #ffbd2e; }
+        body.theme-terminal .terminal-btn.maximize { background: #27c93f; }
+        body.theme-terminal .terminal-title { font-size: 0.8125rem; color: var(--text-muted); }
+        body.theme-terminal .terminal-body { padding: 1.5rem; }
+
+        body.theme-terminal .line { margin-bottom: 0.5rem; }
+        body.theme-terminal .prompt { color: var(--green); }
+        body.theme-terminal .command { color: var(--cyan); }
+        body.theme-terminal .comment { color: var(--text-muted); }
+        body.theme-terminal .output { padding-left: 1rem; margin: 0.5rem 0; }
+        body.theme-terminal .status-working { color: var(--green); }
+        body.theme-terminal .status-resting { color: var(--red); }
+        body.theme-terminal .shift-morning { color: var(--yellow); }
+        body.theme-terminal .shift-afternoon { color: var(--blue); }
+        body.theme-terminal .shift-night { color: var(--purple); }
+        body.theme-terminal .shift-free { color: var(--green); }
+
+        body.theme-terminal .section { margin: 1.5rem 0; padding: 1rem; background: var(--bg); border-radius: 6px; border: 1px solid var(--border); }
+        body.theme-terminal .section-title { color: var(--cyan); margin-bottom: 0.75rem; font-weight: 600; }
+
+        body.theme-terminal .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 0.5rem; }
+        body.theme-terminal .calendar-header { color: var(--text-muted); text-align: center; padding: 0.5rem 0; font-size: 0.6875rem; }
+        body.theme-terminal .calendar-day {
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg); border: 1px solid var(--border); font-size: 0.75rem; transition: all 0.15s;
+        }
+        body.theme-terminal .calendar-day:not(.empty):hover { border-color: var(--cyan); }
+        body.theme-terminal .calendar-day.empty { background: transparent; border-color: transparent; }
+        body.theme-terminal .calendar-day.today { background: var(--green); color: var(--bg); border-color: var(--green); font-weight: 700; }
+        body.theme-terminal .calendar-day.next-work { background: var(--cyan); color: var(--bg); border-color: var(--cyan); font-weight: 700; }
+        body.theme-terminal .day-number { font-weight: 600; }
+        body.theme-terminal .shift-indicator { font-size: 0.5rem; text-transform: uppercase; opacity: 0.8; margin-top: 1px; }
+        body.theme-terminal .calendar-day.today .shift-indicator,
+        body.theme-terminal .calendar-day.next-work .shift-indicator { opacity: 1; }
+
+        body.theme-terminal .legend-row { display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        body.theme-terminal .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; }
+        body.theme-terminal .legend-box { width: 12px; height: 12px; border: 1px solid; }
+        body.theme-terminal .legend-box.morning { border-color: var(--yellow); background: rgba(210, 153, 34, 0.3); }
+        body.theme-terminal .legend-box.afternoon { border-color: var(--blue); background: rgba(88, 166, 255, 0.3); }
+        body.theme-terminal .legend-box.night { border-color: var(--purple); background: rgba(163, 113, 247, 0.3); }
+        body.theme-terminal .legend-box.free { border-color: var(--green); background: rgba(63, 185, 80, 0.3); }
+
+        body.theme-terminal .cursor { display: inline-block; width: 8px; height: 16px; background: var(--green); animation: blink 1s infinite; vertical-align: middle; margin-left: 0.25rem; }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+        body.theme-terminal footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; }
+        body.theme-terminal footer a { color: var(--cyan); text-decoration: none; }
+        body.theme-terminal footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 640px) {
+            body.theme-terminal { font-size: 12px; }
+            body.theme-terminal .calendar-day { font-size: 0.625rem; }
+            body.theme-terminal .shift-indicator { display: none; }
+        }
+
+        /* ============================================
+           THEME SWITCHER (All themes)
+           ============================================ */
+        .theme-switcher {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            z-index: 1000;
+        }
+
+        /* Add bottom padding to body to prevent content being hidden behind fixed switcher */
+        body { padding-bottom: 5rem; }
+
+        .theme-btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        body.theme-neumorphism .theme-switcher {
+            background: var(--bg);
+            border-top: 1px solid var(--shadow-dark);
+        }
+        body.theme-neumorphism .theme-btn {
+            background: var(--bg);
+            color: var(--text-muted);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        }
+        body.theme-neumorphism .theme-btn:hover,
+        body.theme-neumorphism .theme-btn.active {
+            color: var(--accent);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+        }
+
+        body.theme-bento .theme-switcher {
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
+        body.theme-bento .theme-btn {
+            background: white;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        body.theme-bento .theme-btn:hover,
+        body.theme-bento .theme-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        body.theme-terminal .theme-switcher {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
+        body.theme-terminal .theme-btn {
+            background: var(--bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        body.theme-terminal .theme-btn:hover,
+        body.theme-terminal .theme-btn.active {
+            background: var(--cyan);
+            color: var(--bg);
+            border-color: var(--cyan);
+        }
+
+        /* Hide non-active theme content */
+        .theme-content { display: none; }
+        body.theme-neumorphism .theme-neumorphism-content { display: block; }
+        body.theme-bento .theme-bento-content { display: block; }
+        body.theme-terminal .theme-terminal-content { display: block; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header class="page-header">
-            <h1>Horaire de Miaro</h1>
-            <div class="subtitle">Suivi en temps réel du planning de travail</div>
-        </header>
+<body class="theme-neumorphism">
+    <!-- ============================================
+         NEUMORPHISM THEME CONTENT
+         ============================================ -->
+    <div class="theme-content theme-neumorphism-content">
+        <div class="container">
+            <header class="neu">
+                <h1>Horaire de Miaro</h1>
+                <p class="subtitle">Suivi en temps réel du planning</p>
+            </header>
 
-        <main>
-            <!-- Current Status Card -->
-            <div class="card">
-                <div class="card-header">Statut Actuel</div>
-                <div class="card-body">
-                    <div class="status-container">
+            <div class="cards-row">
+                <div class="card neu">
+                    <div class="card-label">Statut</div>
+                    <div class="status-display">
                         {{ if eq .IsWorking "est au travail" }}
-                        <div class="status-badge working">
-                            <span class="status-indicator"></span>
-                            <span>Au travail</span>
+                        <div class="status-orb working">&#10003;</div>
+                        <div class="status-info">
+                            <h3>Au travail</h3>
+                            <p>Actuellement en service</p>
                         </div>
                         {{ else }}
-                        <div class="status-badge not-working">
-                            <span class="status-indicator"></span>
-                            <span>Pas au travail</span>
+                        <div class="status-orb resting">&#9675;</div>
+                        <div class="status-info">
+                            <h3>Repos</h3>
+                            <p>Pas en service</p>
                         </div>
                         {{ end }}
                     </div>
+                </div>
 
-                    {{ if eq .Schedule "du matin" }}
-                    <div class="shift-morning">
-                        <div class="schedule-info">
-                            <div class="schedule-details">
-                                <h3>Équipe du Matin</h3>
-                                <p class="schedule-time">06:00 - 14:00</p>
-                            </div>
-                        </div>
+                <div class="card neu">
+                    <div class="card-label">Équipe</div>
+                    <div class="shift-display neu-inset">
+                        {{ if eq .Schedule "du matin" }}
+                        <div class="shift-name morning">Matin</div>
+                        <div class="shift-time">06:00 – 14:00</div>
+                        {{ else if eq .Schedule "de l'après-midi" }}
+                        <div class="shift-name afternoon">Après-midi</div>
+                        <div class="shift-time">14:00 – 22:00</div>
+                        {{ else if eq .Schedule "de nuit" }}
+                        <div class="shift-name night">Nuit</div>
+                        <div class="shift-time">22:00 – 06:00</div>
+                        {{ else }}
+                        <div class="shift-name free">Libre</div>
+                        <div class="shift-time">Jour de repos</div>
+                        {{ end }}
                     </div>
-                    {{ else if eq .Schedule "de l'après-midi" }}
-                    <div class="shift-afternoon">
-                        <div class="schedule-info">
-                            <div class="schedule-details">
-                                <h3>Équipe de l'Après-midi</h3>
-                                <p class="schedule-time">14:00 - 22:00</p>
-                            </div>
-                        </div>
-                    </div>
-                    {{ else if eq .Schedule "de nuit" }}
-                    <div class="shift-night">
-                        <div class="schedule-info">
-                            <div class="schedule-details">
-                                <h3>Équipe de Nuit</h3>
-                                <p class="schedule-time">22:00 - 06:00</p>
-                            </div>
-                        </div>
-                    </div>
-                    {{ else if eq .Schedule "libre" }}
-                    <div class="shift-free">
-                        <div class="schedule-info">
-                            <div class="schedule-details">
-                                <h3>Jour de Repos</h3>
-                                <p class="schedule-time">Temps libre</p>
-                            </div>
-                        </div>
-                    </div>
-                    {{ end }}
                 </div>
             </div>
 
-            <!-- Calendar View Card -->
-            <div class="card">
-                <div class="card-header">Planning du Mois</div>
-                <div class="card-body">
-                    <div class="calendar-header">
-                        <h3>Prochain jour de travail: {{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</h3>
+            <div class="calendar-card neu">
+                <div class="calendar-header">
+                    <h2>Planning du mois</h2>
+                    <span class="next-badge">Prochain: {{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</span>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Lun</div>
+                    <div class="calendar-day-header">Mar</div>
+                    <div class="calendar-day-header">Mer</div>
+                    <div class="calendar-day-header">Jeu</div>
+                    <div class="calendar-day-header">Ven</div>
+                    <div class="calendar-day-header">Sam</div>
+                    <div class="calendar-day-header">Dim</div>
+                    {{ range .CalendarDays }}
+                    <div class="calendar-day {{ if .IsEmpty }}empty{{ end }} {{ if .IsToday }}today{{ end }} {{ if .IsNextWork }}next-work{{ end }}">
+                        {{ if not .IsEmpty }}
+                        <div class="day-number">{{ .DayNumber }}</div>
+                        <div class="shift-indicator">{{ .ShiftType }}</div>
+                        {{ end }}
                     </div>
+                    {{ end }}
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-dot morning"></div> Matin</div>
+                    <div class="legend-item"><div class="legend-dot afternoon"></div> Après-midi</div>
+                    <div class="legend-item"><div class="legend-dot night"></div> Nuit</div>
+                    <div class="legend-item"><div class="legend-dot free"></div> Libre</div>
+                </div>
+            </div>
 
+            <div class="theme-switcher">
+                <button class="theme-btn active" data-theme="neumorphism">Soft</button>
+                <button class="theme-btn" data-theme="bento">Bento</button>
+                <button class="theme-btn" data-theme="terminal">Terminal</button>
+            </div>
+
+            <footer>
+                <a href="https://github.com/disqt/miaro-scheduler-api">Miaro Scheduler API</a>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ============================================
+         BENTO THEME CONTENT
+         ============================================ -->
+    <div class="theme-content theme-bento-content">
+        <div class="container">
+            <div class="bento-grid">
+                <div class="bento-item bento-title">
+                    <h1>Horaire de Miaro</h1>
+                    <p>Suivi en temps réel du planning de travail</p>
+                </div>
+
+                <div class="bento-item bento-status">
+                    {{ if eq .IsWorking "est au travail" }}
+                    <div class="status-circle working">&#10003;</div>
+                    {{ else }}
+                    <div class="status-circle resting">&#9675;</div>
+                    {{ end }}
+                    <div class="status-label">Statut</div>
+                    <div class="status-value">
+                        {{ if eq .IsWorking "est au travail" }}Au travail{{ else }}Repos{{ end }}
+                    </div>
+                </div>
+
+                <div class="bento-item bento-shift">
+                    <div class="shift-label">Équipe</div>
+                    {{ if eq .Schedule "du matin" }}
+                    <div class="shift-name morning">Matin</div>
+                    <div class="shift-time">06:00 – 14:00</div>
+                    {{ else if eq .Schedule "de l'après-midi" }}
+                    <div class="shift-name afternoon">Après-midi</div>
+                    <div class="shift-time">14:00 – 22:00</div>
+                    {{ else if eq .Schedule "de nuit" }}
+                    <div class="shift-name night">Nuit</div>
+                    <div class="shift-time">22:00 – 06:00</div>
+                    {{ else }}
+                    <div class="shift-name free">Libre</div>
+                    <div class="shift-time">Jour de repos</div>
+                    {{ end }}
+                </div>
+
+                <div class="bento-item bento-calendar">
+                    <div class="calendar-title">
+                        <h2>Planning du mois</h2>
+                        <span class="next-badge">Prochain: {{ if eq .NextWorkingDay "demain" }}Demain{{ else }}{{ .NextWorkingDay | title }}{{ end }}</span>
+                    </div>
                     <div class="calendar-grid">
-                        <div class="calendar-day-header">Lun</div>
-                        <div class="calendar-day-header">Mar</div>
-                        <div class="calendar-day-header">Mer</div>
-                        <div class="calendar-day-header">Jeu</div>
-                        <div class="calendar-day-header">Ven</div>
-                        <div class="calendar-day-header">Sam</div>
-                        <div class="calendar-day-header">Dim</div>
-
+                        <div class="calendar-header">Lun</div>
+                        <div class="calendar-header">Mar</div>
+                        <div class="calendar-header">Mer</div>
+                        <div class="calendar-header">Jeu</div>
+                        <div class="calendar-header">Ven</div>
+                        <div class="calendar-header">Sam</div>
+                        <div class="calendar-header">Dim</div>
                         {{ range .CalendarDays }}
                         <div class="calendar-day {{ if .IsEmpty }}empty{{ end }} {{ if .IsToday }}today{{ end }} {{ if .IsNextWork }}next-work{{ end }}">
                             {{ if not .IsEmpty }}
@@ -421,33 +548,148 @@
                         </div>
                         {{ end }}
                     </div>
+                </div>
 
-                    <div class="calendar-legend">
-                        <div class="legend-item">
-                            <div class="legend-color morning"></div>
-                            <span>Matin</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color afternoon"></div>
-                            <span>Après-midi</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color night"></div>
-                            <span>Nuit</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color free"></div>
-                            <span>Libre</span>
-                        </div>
-                    </div>
+                <div class="bento-item bento-legend">
+                    <div class="legend-item"><div class="legend-color morning"></div> Matin</div>
+                    <div class="legend-item"><div class="legend-color afternoon"></div> Après-midi</div>
+                    <div class="legend-item"><div class="legend-color night"></div> Nuit</div>
+                    <div class="legend-item"><div class="legend-color free"></div> Libre</div>
                 </div>
             </div>
-        </main>
 
-        <footer>
-            <a href="https://github.com/disqt/miaro-scheduler-api" target="_blank" rel="noopener">&copy; 2024 Disqt - Miaro Scheduler API</a>
-        </footer>
+            <div class="theme-switcher">
+                <button class="theme-btn" data-theme="neumorphism">Soft</button>
+                <button class="theme-btn active" data-theme="bento">Bento</button>
+                <button class="theme-btn" data-theme="terminal">Terminal</button>
+            </div>
+
+            <footer>
+                <a href="https://github.com/disqt/miaro-scheduler-api">Miaro Scheduler API</a>
+            </footer>
+        </div>
     </div>
+
+    <!-- ============================================
+         TERMINAL THEME CONTENT
+         ============================================ -->
+    <div class="theme-content theme-terminal-content">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <span class="terminal-btn close"></span>
+                    <span class="terminal-btn minimize"></span>
+                    <span class="terminal-btn maximize"></span>
+                </div>
+                <span class="terminal-title">miaro@schedule:~</span>
+            </div>
+
+            <div class="terminal-body">
+                <div class="line">
+                    <span class="prompt">miaro@schedule:~$</span> <span class="command">./check_status.sh</span>
+                </div>
+                <div class="output">
+                    <span class="comment"># Vérification du statut...</span>
+                </div>
+                <div class="output">
+                    {{ if eq .IsWorking "est au travail" }}
+                    STATUS: <span class="status-working">[ONLINE]</span> Au travail
+                    {{ else }}
+                    STATUS: <span class="status-resting">[OFFLINE]</span> Repos
+                    {{ end }}
+                </div>
+
+                <div class="line" style="margin-top: 1.5rem;">
+                    <span class="prompt">miaro@schedule:~$</span> <span class="command">cat /var/schedule/current</span>
+                </div>
+                <div class="output">
+                    {{ if eq .Schedule "du matin" }}
+                    SHIFT: <span class="shift-morning">MATIN</span> (06:00 → 14:00)
+                    {{ else if eq .Schedule "de l'après-midi" }}
+                    SHIFT: <span class="shift-afternoon">APRÈS-MIDI</span> (14:00 → 22:00)
+                    {{ else if eq .Schedule "de nuit" }}
+                    SHIFT: <span class="shift-night">NUIT</span> (22:00 → 06:00)
+                    {{ else }}
+                    SHIFT: <span class="shift-free">LIBRE</span> (jour de repos)
+                    {{ end }}
+                </div>
+
+                <div class="line" style="margin-top: 1.5rem;">
+                    <span class="prompt">miaro@schedule:~$</span> <span class="command">./next_work.sh</span>
+                </div>
+                <div class="output">
+                    NEXT_WORK: <span class="status-working">{{ if eq .NextWorkingDay "demain" }}DEMAIN{{ else }}{{ .NextWorkingDay | title }}{{ end }}</span>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">$ cal --schedule</div>
+                    <div class="calendar-grid">
+                        <div class="calendar-header">LUN</div>
+                        <div class="calendar-header">MAR</div>
+                        <div class="calendar-header">MER</div>
+                        <div class="calendar-header">JEU</div>
+                        <div class="calendar-header">VEN</div>
+                        <div class="calendar-header">SAM</div>
+                        <div class="calendar-header">DIM</div>
+                        {{ range .CalendarDays }}
+                        <div class="calendar-day {{ if .IsEmpty }}empty{{ end }} {{ if .IsToday }}today{{ end }} {{ if .IsNextWork }}next-work{{ end }}">
+                            {{ if not .IsEmpty }}
+                            <div class="day-number">{{ .DayNumber }}</div>
+                            <div class="shift-indicator">{{ .ShiftType }}</div>
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                    <div class="legend-row">
+                        <div class="legend-item"><div class="legend-box morning"></div> <span class="shift-morning">Matin</span></div>
+                        <div class="legend-item"><div class="legend-box afternoon"></div> <span class="shift-afternoon">Après-midi</span></div>
+                        <div class="legend-item"><div class="legend-box night"></div> <span class="shift-night">Nuit</span></div>
+                        <div class="legend-item"><div class="legend-box free"></div> <span class="shift-free">Libre</span></div>
+                    </div>
+                </div>
+
+                <div class="theme-switcher">
+                    <button class="theme-btn" data-theme="neumorphism">Soft</button>
+                    <button class="theme-btn" data-theme="bento">Bento</button>
+                    <button class="theme-btn active" data-theme="terminal">Terminal</button>
+                </div>
+
+                <div class="line" style="margin-top: 1rem;">
+                    <span class="prompt">miaro@schedule:~$</span><span class="cursor"></span>
+                </div>
+
+                <footer>
+                    <span class="comment"># Source: <a href="https://github.com/disqt/miaro-scheduler-api">github.com/disqt/miaro-scheduler-api</a></span>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'miaro-theme';
+            const DEFAULT_THEME = 'neumorphism';
+
+            function setTheme(theme) {
+                document.body.className = 'theme-' + theme;
+                localStorage.setItem(STORAGE_KEY, theme);
+                document.querySelectorAll('.theme-btn').forEach(function(btn) {
+                    btn.classList.toggle('active', btn.dataset.theme === theme);
+                });
+            }
+
+            // Load saved theme or default
+            var savedTheme = localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+            setTheme(savedTheme);
+
+            // Add click handlers
+            document.querySelectorAll('.theme-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    setTheme(this.dataset.theme);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
 {{ end }}
