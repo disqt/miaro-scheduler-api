@@ -91,6 +91,7 @@
         body.theme-neumorphism .calendar-day {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-radius: 12px; font-size: 0.875rem; transition: all 0.2s ease; cursor: default;
+            background: var(--bg);
             box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
         }
         body.theme-neumorphism .calendar-day:not(.empty):hover {
@@ -313,12 +314,19 @@
            THEME SWITCHER (All themes)
            ============================================ */
         .theme-switcher {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: center;
             gap: 0.75rem;
-            margin-top: 2rem;
             padding: 1rem;
+            z-index: 1000;
         }
+
+        /* Add bottom padding to body to prevent content being hidden behind fixed switcher */
+        body { padding-bottom: 5rem; }
 
         .theme-btn {
             padding: 0.625rem 1.25rem;
@@ -331,6 +339,10 @@
             font-family: inherit;
         }
 
+        body.theme-neumorphism .theme-switcher {
+            background: var(--bg);
+            border-top: 1px solid var(--shadow-dark);
+        }
         body.theme-neumorphism .theme-btn {
             background: var(--bg);
             color: var(--text-muted);
@@ -342,6 +354,10 @@
             box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
         }
 
+        body.theme-bento .theme-switcher {
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
         body.theme-bento .theme-btn {
             background: white;
             color: var(--text-muted);
@@ -354,6 +370,10 @@
             border-color: var(--accent);
         }
 
+        body.theme-terminal .theme-switcher {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
         body.theme-terminal .theme-btn {
             background: var(--bg);
             color: var(--text-muted);
