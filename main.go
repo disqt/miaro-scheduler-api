@@ -5,7 +5,7 @@ import (
 	"embed"
 	"html/template"
 	"log/slog"
-	"miaro-schedule-api/pkg"
+	"miaro-scheduler-api/pkg"
 	"net/http"
 	"os"
 	"os/signal"

@@ -1,4 +1,4 @@
-module miaro-schedule-api
+module miaro-scheduler-api
 
 go 1.24.0
 
