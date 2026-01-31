@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log/slog"
-	"miaro-schedule-api/pkg"
+	"main/pkg"
 	"net/http"
 	"net/http/httptest"
 	"os"
