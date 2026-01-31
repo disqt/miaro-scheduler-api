@@ -33,6 +33,7 @@ func SchedulerHandler() gin.HandlerFunc {
 			"IsWorking":              scheduleBeautified.IsWorking,
 			"NextWorkingDay":         scheduleBeautified.NextWorkingDay,
 			"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
+			"CalendarDays":           scheduleBeautified.CalendarDays,
 		})
 	}
 }
