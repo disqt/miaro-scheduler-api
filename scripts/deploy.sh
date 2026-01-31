@@ -5,7 +5,7 @@ set -e
 # Usage: ./scripts/deploy.sh [build|deploy|restart|stop|logs|status]
 
 SERVICE_NAME="miaro-scheduler-api"
-BINARY_NAME="miaro-scheduler-api"
+BINARY_NAME="main"
 INSTALL_DIR="/opt/miaro-scheduler-api"
 
 # Colors for output
