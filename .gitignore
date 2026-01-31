@@ -33,3 +33,6 @@ coverage.txt
 
 # preview files
 preview.html
+
+# Claude
+settings.local.json
