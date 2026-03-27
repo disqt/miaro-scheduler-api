@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 	"unicode"
@@ -22,10 +24,31 @@ import (
 //go:embed templates/*
 var templatesFS embed.FS
 
+// teamNames maps team numbers (1-5) to display names.
+var teamNames = map[int]string{
+	1: "Miaro",
+	2: "Équipe 2",
+	3: "Équipe 3",
+	4: "Équipe 4",
+	5: "Équipe 5",
+}
+
+// parseTeam extracts the team number (1-5) from the query string, defaulting to 1.
+func parseTeam(c *gin.Context) int {
+	teamStr := c.DefaultQuery("team", "1")
+	team, err := strconv.Atoi(teamStr)
+	if err != nil || team < 1 || team > 5 {
+		return 1
+	}
+	return team
+}
+
 // SchedulerHandler returns a Gin handler for the HTML schedule endpoint.
 func SchedulerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule()
+		team := parseTeam(c)
+		teamOffset := (team - 1) * 2
+		schedule := pkg.CalculateScheduleForTeam(teamOffset)
 		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
 
 		c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
@@ -34,6 +57,9 @@ func SchedulerHandler() gin.HandlerFunc {
 			"NextWorkingDay":         scheduleBeautified.NextWorkingDay,
 			"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
 			"CalendarDays":           scheduleBeautified.CalendarDays,
+			"Team":                   team,
+			"TeamName":               teamNames[team],
+			"TeamNames":              teamNames,
 		})
 	}
 }
@@ -41,7 +67,9 @@ func SchedulerHandler() gin.HandlerFunc {
 // SchedulerJSONHandler returns a Gin handler for the JSON schedule endpoint.
 func SchedulerJSONHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule()
+		team := parseTeam(c)
+		teamOffset := (team - 1) * 2
+		schedule := pkg.CalculateScheduleForTeam(teamOffset)
 		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
 
 		c.JSON(http.StatusOK, gin.H{
@@ -50,6 +78,8 @@ func SchedulerJSONHandler() gin.HandlerFunc {
 			"next_working_day":          scheduleBeautified.NextWorkingDay,
 			"schedule_next_working_day": scheduleBeautified.ScheduleNextWorkingDay,
 			"raw_schedule":              schedule,
+			"team":                      team,
+			"team_name":                 teamNames[team],
 		})
 	}
 }
@@ -91,6 +121,7 @@ func setupRouter(config *pkg.Config, logger *slog.Logger) *gin.Engine {
 			runes[0] = unicode.ToUpper(runes[0])
 			return string(runes)
 		},
+		"lower": strings.ToLower,
 	}
 
 	// Parse the templates from the embedded filesystem with custom functions

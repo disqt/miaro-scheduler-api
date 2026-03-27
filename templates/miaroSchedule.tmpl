@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horaire de Miaro</title>
+    <title>Horaire de {{ .TeamName }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -311,16 +311,18 @@
         }
 
         /* ============================================
-           THEME SWITCHER DROPDOWN (All themes)
+           DROPDOWNS (Theme + Team)
            ============================================ */
-        .theme-dropdown {
+        .top-controls {
             position: fixed;
             top: 1rem;
             right: 1rem;
             z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .theme-dropdown select {
+        .top-controls select {
             padding: 0.5rem 2rem 0.5rem 0.75rem;
             border-radius: 10px;
             font-size: 0.8125rem;
@@ -335,21 +337,21 @@
             background-position: right 0.6rem center;
         }
 
-        body.theme-neumorphism .theme-dropdown select {
+        body.theme-neumorphism .top-controls select {
             background-color: var(--bg);
             color: var(--text);
             border: none;
             box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
         }
 
-        body.theme-bento .theme-dropdown select {
+        body.theme-bento .top-controls select {
             background-color: var(--card-bg);
             color: var(--text);
             border: 1px solid var(--border);
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
-        body.theme-terminal .theme-dropdown select {
+        body.theme-terminal .top-controls select {
             background-color: var(--surface);
             color: var(--text);
             border: 1px solid var(--border);
@@ -370,7 +372,7 @@
     <div class="theme-content theme-neumorphism-content">
         <div class="container">
             <header class="neu">
-                <h1>Horaire de Miaro</h1>
+                <h1>Horaire de {{ .TeamName }}</h1>
                 <p class="subtitle">Suivi en temps réel du planning</p>
             </header>
 
@@ -457,7 +459,7 @@
         <div class="container">
             <div class="bento-grid">
                 <div class="bento-item bento-title">
-                    <h1>Horaire de Miaro</h1>
+                    <h1>Horaire de {{ .TeamName }}</h1>
                     <p>Suivi en temps réel du planning de travail</p>
                 </div>
 
@@ -539,7 +541,7 @@
                     <span class="terminal-btn minimize"></span>
                     <span class="terminal-btn maximize"></span>
                 </div>
-                <span class="terminal-title">miaro@schedule:~</span>
+                <span class="terminal-title">{{ .TeamName | lower }}@schedule:~</span>
             </div>
 
             <div class="terminal-body">
@@ -617,7 +619,14 @@
         </div>
     </div>
 
-    <div class="theme-dropdown">
+    <div class="top-controls">
+        <select id="team-select">
+            <option value="1"{{ if eq .Team 1 }} selected{{ end }}>Miaro</option>
+            <option value="2"{{ if eq .Team 2 }} selected{{ end }}>Équipe 2</option>
+            <option value="3"{{ if eq .Team 3 }} selected{{ end }}>Équipe 3</option>
+            <option value="4"{{ if eq .Team 4 }} selected{{ end }}>Équipe 4</option>
+            <option value="5"{{ if eq .Team 5 }} selected{{ end }}>Équipe 5</option>
+        </select>
         <select id="theme-select">
             <option value="neumorphism">Soft</option>
             <option value="bento">Bento</option>
@@ -627,22 +636,31 @@
 
     <script>
         (function() {
-            const STORAGE_KEY = 'miaro-theme';
+            // Theme handling
+            const THEME_KEY = 'miaro-theme';
             const DEFAULT_THEME = 'neumorphism';
-            const select = document.getElementById('theme-select');
+            const themeSelect = document.getElementById('theme-select');
 
             function setTheme(theme) {
                 document.body.className = 'theme-' + theme;
-                localStorage.setItem(STORAGE_KEY, theme);
-                select.value = theme;
+                localStorage.setItem(THEME_KEY, theme);
+                themeSelect.value = theme;
             }
 
-            // Load saved theme or default
-            var savedTheme = localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+            var savedTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
             setTheme(savedTheme);
 
-            select.addEventListener('change', function() {
+            themeSelect.addEventListener('change', function() {
                 setTheme(this.value);
+            });
+
+            // Team handling
+            var teamSelect = document.getElementById('team-select');
+            teamSelect.addEventListener('change', function() {
+                var team = this.value;
+                var url = new URL(window.location);
+                url.searchParams.set('team', team);
+                window.location.href = url.toString();
             });
         })();
     </script>

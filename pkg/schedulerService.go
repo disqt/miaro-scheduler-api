@@ -31,6 +31,7 @@ type Schedule struct {
 	TimeRequested time.Time    `json:"time_requested"`
 	ScheduleType  ScheduleType `json:"schedule_type"`
 	DayInSchedule int          `json:"day_in_schedule"`
+	TeamOffset    int          `json:"team_offset"`
 }
 
 /*
@@ -39,6 +40,12 @@ This defaults to time.Now() if there is no parameters.
 This will exit the program if there are more than 1 parameter.
 */
 func CalculateSchedule(timeReq ...time.Time) Schedule {
+	return CalculateScheduleForTeam(0, timeReq...)
+}
+
+// CalculateScheduleForTeam calculates the schedule with a team offset applied.
+// Each team is offset by a multiple of 2 days in the 10-day cycle.
+func CalculateScheduleForTeam(teamOffset int, timeReq ...time.Time) Schedule {
 	var date time.Time
 	loc, err := time.LoadLocation("Europe/Paris")
 	if err != nil {
@@ -59,11 +66,12 @@ func CalculateSchedule(timeReq ...time.Time) Schedule {
 
 	diffDays := int(date.Sub(initialDate).Hours() / 24)
 
-	dayInSchedule := diffDays % 10
+	dayInSchedule := ((diffDays + teamOffset) % 10 + 10) % 10
 
 	return Schedule{
 		TimeRequested: date,
 		ScheduleType:  schedule[dayInSchedule],
 		DayInSchedule: dayInSchedule,
+		TeamOffset:    teamOffset,
 	}
 }
