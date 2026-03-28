@@ -922,6 +922,16 @@
                 });
             });
 
+            // Strip month param from URL so refresh returns to current month
+            const pageUrl = new URL(window.location);
+            if (pageUrl.searchParams.has('month')) {
+                pageUrl.searchParams.delete('month');
+                const cleanUrl = pageUrl.searchParams.toString()
+                    ? pageUrl.pathname + '?' + pageUrl.searchParams.toString()
+                    : pageUrl.pathname;
+                history.replaceState(null, '', cleanUrl);
+            }
+
             // Team selector
             window.selectTeam = function(teamNum) {
                 const url = new URL(window.location);
