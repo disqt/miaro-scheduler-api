@@ -28,6 +28,8 @@ Request -> Gin router (main.go) -> Handler -> CalculateSchedule() -> FormatSched
 
 **Routes:** `GET /miaro` (HTML), `GET /miaro/json` (JSON), `GET /health` (health check).
 
+**Team resolution** (HTML handler): `?team=` param > `miaro-team` cookie > default (1). `?team=1` redirects to `/miaro` (canonical). Cookie set with `Secure; SameSite=Lax; Path=/miaro`.
+
 **Schedule calculation** (`pkg/schedulerService.go`): Epoch is Aug 31, 2024 midnight Europe/Paris. Computes `daysSinceEpoch % 10` to determine shift:
 
 | Day index | Shift | Hours |
@@ -62,7 +64,7 @@ Environment variables (all optional):
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `8081` | Server listen port |
-| `TIMEZONE` | `Europe/Paris` | Timezone for config (not for schedule calc) |
+| `TIMEZONE` | `Europe/Paris` | Validated at startup but not used for schedule calc (hardcoded to Europe/Paris) |
 | `ENABLE_CORS` | `false` | Enable CORS with allow-all-origins |
 
 ## Deployment
@@ -76,6 +78,8 @@ Deploy steps (on VPS):
 ```bash
 ssh dev "cd ~/projects/miaro-scheduler-api && git pull && go test ./... && CGO_ENABLED=0 go build -o main . && sudo systemctl restart miaro-scheduler-api"
 ```
+
+Verify: `ssh dev "systemctl is-active miaro-scheduler-api && curl -s http://localhost:8081/health"`
 
 Note: `scripts/deploy.sh` copies to `/opt/` which is stale -- the service runs from `~/projects/`. The binary must be named `main`.
 
