@@ -55,6 +55,7 @@ func setTeamCookie(c *gin.Context, team int) {
 		Path:     "/miaro",
 		MaxAge:   365 * 24 * 60 * 60,
 		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
 	})
 }
 
