@@ -232,7 +232,7 @@ func TestNextWorkingDay(t *testing.T) {
 func TestCalculateSchedule_UsesParisTimezone(t *testing.T) {
 	utc := time.Date(2025, 6, 9, 13, 30, 0, 0, time.UTC)
 
-	result := CalculateSchedule(utc)
+	result := CalculateSchedule(utc, MiaroTeam)
 
 	// the returned time requested should be in the Paris timezone
 	// 13:30 UTC should be 15:30 in Europe/Paris (UTC + 2)

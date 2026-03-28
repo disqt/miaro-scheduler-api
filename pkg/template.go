@@ -137,7 +137,7 @@ func GenerateCalendarData(currentSchedule Schedule, nextWorkDays int) []Calendar
 	// Add actual days of the month
 	for day := 1; day <= lastDay.Day(); day++ {
 		currentDate := time.Date(year, month, day, 12, 0, 0, 0, loc)
-		daySchedule := CalculateSchedule(currentDate)
+		daySchedule := CalculateSchedule(currentDate, currentSchedule.Team)
 
 		isToday := day == now.Day()
 		isNextWork := !isToday && daySchedule.ScheduleType != FREE &&

@@ -25,7 +25,7 @@ var templatesFS embed.FS
 // SchedulerHandler returns a Gin handler for the HTML schedule endpoint.
 func SchedulerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule()
+		schedule := pkg.CalculateSchedule(time.Now(), pkg.MiaroTeam)
 		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
 
 		c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
@@ -41,7 +41,7 @@ func SchedulerHandler() gin.HandlerFunc {
 // SchedulerJSONHandler returns a Gin handler for the JSON schedule endpoint.
 func SchedulerJSONHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule()
+		schedule := pkg.CalculateSchedule(time.Now(), pkg.MiaroTeam)
 		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
 
 		c.JSON(http.StatusOK, gin.H{
