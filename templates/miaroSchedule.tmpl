@@ -615,9 +615,9 @@
 
             <div class="calendar-card neu">
                 <div class="calendar-nav">
-                    <a href="/miaro?month={{ .PrevMonth }}{{ .MonthQuery }}">&larr;</a>
+                    <a href="{{ .PrevMonthURL }}">&larr;</a>
                     <h2>{{ .CalendarMonthLabel }}</h2>
-                    <a href="/miaro?month={{ .NextMonth }}{{ .MonthQuery }}">&rarr;</a>
+                    <a href="{{ .NextMonthURL }}">&rarr;</a>
                 </div>
                 <div class="calendar-grid">
                     <div class="calendar-day-header">Lun</div>
@@ -708,9 +708,9 @@
 
                 <div class="bento-item bento-calendar">
                     <div class="calendar-nav">
-                        <a href="/miaro?month={{ .PrevMonth }}{{ .MonthQuery }}">&larr;</a>
+                        <a href="{{ .PrevMonthURL }}">&larr;</a>
                         <h2>{{ .CalendarMonthLabel }}</h2>
-                        <a href="/miaro?month={{ .NextMonth }}{{ .MonthQuery }}">&rarr;</a>
+                        <a href="{{ .NextMonthURL }}">&rarr;</a>
                     </div>
                     <div class="calendar-grid">
                         <div class="calendar-header">Lun</div>
@@ -815,9 +815,9 @@
 
                 <div class="section">
                     <div class="calendar-nav">
-                        <a href="/miaro?month={{ .PrevMonth }}{{ .MonthQuery }}">[prev]</a>
+                        <a href="{{ .PrevMonthURL }}">[prev]</a>
                         <span>$ cal --schedule {{ .CalendarMonthLabel }}</span>
-                        <a href="/miaro?month={{ .NextMonth }}{{ .MonthQuery }}">[next]</a>
+                        <a href="{{ .NextMonthURL }}">[next]</a>
                     </div>
                     <div class="calendar-grid">
                         <div class="calendar-header">LUN</div>
