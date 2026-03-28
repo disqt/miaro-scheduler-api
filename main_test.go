@@ -388,4 +388,3 @@ func TestSchedulerHandler_MonthAndTeamParams(t *testing.T) {
 		t.Fatal("Expected miaro-team cookie to be set")
 	}
 }
-
