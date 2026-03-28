@@ -50,7 +50,7 @@ Request -> Gin router (main.go) -> Handler -> CalculateSchedule() -> FormatSched
 ## Design Decisions
 
 - **No database** -- schedule is deterministic from epoch date via modulo arithmetic.
-- **Europe/Paris hardcoded** in `CalculateSchedule()` for correct CET/CEST handling. The `TIMEZONE` env var only affects `Config.ScheduleStart`.
+- **Europe/Paris timezone** loaded once at package init into `parisLoc` var. All schedule code uses `parisLoc` -- never call `time.LoadLocation` again in pkg.
 - **All UI text in French.** The `title` template function provides French-compatible title casing.
 - **Structured logging** via `slog` with JSON handler. Tests use `slog.LevelError` to suppress noise.
 - **Graceful shutdown** on SIGINT/SIGTERM with 5-second drain.
@@ -67,11 +67,17 @@ Environment variables (all optional):
 
 ## Deployment
 
-- **Service:** `miaro-scheduler-api` (systemd), runs as `www-data`
-- **Install path:** `/opt/miaro-scheduler-api`
+- **Service:** `miaro-scheduler-api` (systemd)
+- **Binary:** `/home/dev/projects/miaro-scheduler-api/main` (service ExecStart points here)
 - **Public URL:** `https://disqt.com/miaro` (nginx reverse proxy)
 - **VPS access:** `ssh dev`
-- **Deploy:** `./scripts/deploy.sh deploy` (runs tests, builds, installs, restarts)
+
+Deploy steps (on VPS):
+```bash
+ssh dev "cd ~/projects/miaro-scheduler-api && git pull && go test ./... && CGO_ENABLED=0 go build -o main . && sudo systemctl restart miaro-scheduler-api"
+```
+
+Note: `scripts/deploy.sh` copies to `/opt/` which is stale -- the service runs from `~/projects/`. The binary must be named `main`.
 
 ## CI
 
