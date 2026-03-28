@@ -229,6 +229,52 @@ func TestNextWorkingDay(t *testing.T) {
 
 }
 
+func TestGenerateCalendarData_FullWeeks(t *testing.T) {
+	// March 2026: starts on Sunday (weekdayOffset=6), ends on Tuesday (Mar 31)
+	// 6 leading days (Feb 23 Mon - Feb 28 Sat) + 31 March days + 5 trailing days (Apr 1-5) = 42 (6 weeks)
+	now := time.Date(2026, time.March, 15, 12, 0, 0, 0, parisLoc)
+	targetMonth := time.Date(2026, time.March, 1, 0, 0, 0, 0, parisLoc)
+	schedule := CalculateSchedule(now, MiaroTeam)
+
+	days := GenerateCalendarData(schedule, targetMonth, 1)
+
+	// Grid should be 6 weeks * 7 = 42 days
+	assert.Equal(t, 42, len(days))
+
+	// First day should be Monday Feb 23 (other-month)
+	assert.Equal(t, 23, days[0].DayNumber)
+	assert.Equal(t, true, days[0].IsOtherMonth)
+	assert.NotEqual(t, "", days[0].ShiftClass)
+
+	// 7th day should be Sunday March 1 (this month)
+	assert.Equal(t, 1, days[6].DayNumber)
+	assert.Equal(t, false, days[6].IsOtherMonth)
+
+	// Day 15 should be marked as today
+	// 6 leading days + 14 (March 1 is at index 6, so March 15 is at index 6+14=20)
+	assert.Equal(t, 15, days[20].DayNumber)
+	assert.Equal(t, true, days[20].IsToday)
+
+	// Last day should be Sunday Apr 5 (other-month)
+	assert.Equal(t, 5, days[41].DayNumber)
+	assert.Equal(t, true, days[41].IsOtherMonth)
+}
+
+func TestGenerateCalendarData_OtherMonthNoToday(t *testing.T) {
+	// Viewing April 2026 while today is March 15 -- no day should be IsToday
+	now := time.Date(2026, time.March, 15, 12, 0, 0, 0, parisLoc)
+	targetMonth := time.Date(2026, time.April, 1, 0, 0, 0, 0, parisLoc)
+	schedule := CalculateSchedule(now, MiaroTeam)
+
+	days := GenerateCalendarData(schedule, targetMonth, 1)
+
+	for _, day := range days {
+		if day.IsToday {
+			t.Errorf("No day should be IsToday when viewing a different month, but day %d is", day.DayNumber)
+		}
+	}
+}
+
 func TestCalculateSchedule_UsesParisTimezone(t *testing.T) {
 	utc := time.Date(2025, 6, 9, 13, 30, 0, 0, time.UTC)
 

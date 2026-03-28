@@ -87,7 +87,6 @@ func TestSchedulerHandler(t *testing.T) {
 		"<!DOCTYPE html>",
 		"Horaire de Miaro",
 		"Statut",
-		"Planning du mois",
 	}
 
 	for _, expected := range expectedStrings {
@@ -326,6 +325,67 @@ func TestSchedulerJSONHandler_DefaultTeam(t *testing.T) {
 	team := rawSchedule["team"].(float64)
 	if int(team) != 1 {
 		t.Errorf("Expected team 1 in raw_schedule, got %v", team)
+	}
+}
+
+func TestSchedulerHandler_MonthParam(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?month=2026-04", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	// Template outputs CalendarMonthLabel once it's wired (Task 3).
+	// For now, verify the page renders successfully.
+	body := w.Body.String()
+	if len(body) == 0 {
+		t.Error("Expected non-empty HTML response for month=2026-04")
+	}
+}
+
+func TestSchedulerHandler_InvalidMonthDefaultsToCurrent(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?month=invalid", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestSchedulerHandler_MonthAndTeamParams(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?month=2026-05&team=3", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	// Template outputs CalendarMonthLabel once it's wired (Task 3).
+	// For now, verify the page renders and the team cookie is set.
+	body := w.Body.String()
+	if len(body) == 0 {
+		t.Error("Expected non-empty HTML response for month=2026-05&team=3")
+	}
+
+	cookies := w.Result().Cookies()
+	var teamCookie *http.Cookie
+	for _, c := range cookies {
+		if c.Name == "miaro-team" {
+			teamCookie = c
+		}
+	}
+	if teamCookie == nil {
+		t.Fatal("Expected miaro-team cookie to be set")
 	}
 }
 

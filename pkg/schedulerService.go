@@ -45,6 +45,11 @@ type Schedule struct {
 	Team          int          `json:"team"`
 }
 
+// ParisLoc returns the Europe/Paris timezone location.
+func ParisLoc() *time.Location {
+	return parisLoc
+}
+
 // CalculateSchedule computes the shift for the given date and team.
 // Each team's epoch is offset forward by (team-1)*2 days from the base epoch (Aug 31, 2024).
 // Invalid team numbers are clamped to MiaroTeam (team 1).

@@ -59,9 +59,28 @@ func setTeamCookie(c *gin.Context, team int) {
 	})
 }
 
+func parseMonthParam(c *gin.Context) time.Time {
+	monthStr := c.Query("month")
+	if monthStr != "" {
+		t, err := time.Parse("2006-01", monthStr)
+		if err == nil {
+			return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC)
+		}
+	}
+	now := time.Now().In(pkg.ParisLoc())
+	return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+}
+
 func renderSchedule(c *gin.Context, team int) {
 	schedule := pkg.CalculateSchedule(time.Now(), team)
-	scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
+	targetMonth := parseMonthParam(c)
+	scheduleBeautified := pkg.FormatScheduleBeautified(schedule, targetMonth)
+
+	// Build month nav query string preserving team param
+	monthQuery := ""
+	if team > 1 {
+		monthQuery = fmt.Sprintf("&team=%d", team)
+	}
 
 	c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
 		"Schedule":               scheduleBeautified.Schedule,
@@ -69,6 +88,11 @@ func renderSchedule(c *gin.Context, team int) {
 		"NextWorkingDay":         scheduleBeautified.NextWorkingDay,
 		"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
 		"CalendarDays":           scheduleBeautified.CalendarDays,
+		"CalendarMonthLabel":     scheduleBeautified.CalendarMonthLabel,
+		"PrevMonth":              scheduleBeautified.PrevMonth,
+		"NextMonth":              scheduleBeautified.NextMonth,
+		"IsCurrentMonth":         scheduleBeautified.IsCurrentMonth,
+		"MonthQuery":             monthQuery,
 		"Team":                   team,
 		"Teams":                  pkg.BuildTeamList(team),
 	})
@@ -80,10 +104,14 @@ func SchedulerHandler() gin.HandlerFunc {
 		teamParam, hasValidParam := parseTeamParam(c)
 		teamCookie, hasValidCookie := readTeamCookie(c)
 
-		// Canonicalize: ?team=1 -> redirect to /miaro
+		// Canonicalize: ?team=1 -> redirect to /miaro (preserve month)
 		if hasValidParam && teamParam == pkg.MiaroTeam {
 			setTeamCookie(c, pkg.MiaroTeam)
-			c.Redirect(http.StatusFound, "/miaro")
+			redirect := "/miaro"
+			if m := c.Query("month"); m != "" {
+				redirect = fmt.Sprintf("/miaro?month=%s", m)
+			}
+			c.Redirect(http.StatusFound, redirect)
 			return
 		}
 
@@ -94,9 +122,13 @@ func SchedulerHandler() gin.HandlerFunc {
 			return
 		}
 
-		// No valid param — check cookie
+		// No valid param — check cookie (preserve month)
 		if hasValidCookie && teamCookie != pkg.MiaroTeam {
-			c.Redirect(http.StatusFound, fmt.Sprintf("/miaro?team=%d", teamCookie))
+			redirect := fmt.Sprintf("/miaro?team=%d", teamCookie)
+			if m := c.Query("month"); m != "" {
+				redirect = fmt.Sprintf("/miaro?team=%d&month=%s", teamCookie, m)
+			}
+			c.Redirect(http.StatusFound, redirect)
 			return
 		}
 
@@ -115,7 +147,9 @@ func SchedulerJSONHandler() gin.HandlerFunc {
 		}
 
 		schedule := pkg.CalculateSchedule(time.Now(), team)
-		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
+		now := time.Now().In(pkg.ParisLoc())
+		currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+		scheduleBeautified := pkg.FormatScheduleBeautified(schedule, currentMonth)
 
 		c.JSON(http.StatusOK, gin.H{
 			"schedule":                  scheduleBeautified.Schedule,
