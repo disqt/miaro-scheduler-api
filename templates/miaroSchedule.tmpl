@@ -84,15 +84,22 @@
         }
 
         body.theme-neumorphism .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        body.theme-neumorphism .calendar-nav .calendar-nav-center { display: flex; align-items: center; gap: 0.5rem; }
         body.theme-neumorphism .calendar-nav h2 { font-size: 1.125rem; font-weight: 700; }
-        body.theme-neumorphism .calendar-nav a {
+        body.theme-neumorphism .calendar-nav .today-btn {
+            font-size: 0.6875rem; color: var(--accent); text-decoration: none; font-weight: 600;
+            padding: 0.2rem 0.5rem; border-radius: 8px;
+            background: var(--bg); box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+        body.theme-neumorphism .calendar-nav .today-btn:hover { box-shadow: 1px 1px 2px var(--shadow-dark), -1px -1px 2px var(--shadow-light); }
+        body.theme-neumorphism .calendar-nav a.arrow {
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
             border-radius: 50%; color: var(--text); text-decoration: none; font-size: 1.125rem;
             background: var(--bg);
             box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
             transition: all 0.2s;
         }
-        body.theme-neumorphism .calendar-nav a:hover {
+        body.theme-neumorphism .calendar-nav a.arrow:hover {
             box-shadow: 1px 1px 3px var(--shadow-dark), -1px -1px 3px var(--shadow-light);
         }
 
@@ -207,13 +214,19 @@
         body.theme-bento .next-badge { background: var(--accent); color: white; padding: 0.375rem 0.875rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
 
         body.theme-bento .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        body.theme-bento .calendar-nav .calendar-nav-center { display: flex; align-items: center; gap: 0.5rem; }
         body.theme-bento .calendar-nav h2 { font-size: 1rem; font-weight: 600; }
-        body.theme-bento .calendar-nav a {
+        body.theme-bento .calendar-nav .today-btn {
+            font-size: 0.6875rem; color: var(--accent); text-decoration: none; font-weight: 500;
+            padding: 0.2rem 0.6rem; border-radius: 12px; border: 1px solid var(--border); transition: all 0.15s;
+        }
+        body.theme-bento .calendar-nav .today-btn:hover { background: #e2e8f0; }
+        body.theme-bento .calendar-nav a.arrow {
             width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
             border-radius: 10px; color: var(--text); text-decoration: none; font-size: 1rem;
             background: var(--bg); border: 1px solid var(--border); transition: all 0.15s;
         }
-        body.theme-bento .calendar-nav a:hover { background: #e2e8f0; }
+        body.theme-bento .calendar-nav a.arrow:hover { background: #e2e8f0; }
 
         body.theme-bento .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
         body.theme-bento .calendar-header { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); text-align: center; padding: 0.5rem; }
@@ -305,9 +318,11 @@
         body.theme-terminal .section-title { color: var(--cyan); margin-bottom: 0.75rem; font-weight: 600; }
 
         body.theme-terminal .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        body.theme-terminal .calendar-nav .calendar-nav-center { display: flex; align-items: center; gap: 0.5rem; }
         body.theme-terminal .calendar-nav span { color: var(--cyan); font-weight: 600; }
         body.theme-terminal .calendar-nav a { color: var(--green); text-decoration: none; font-size: 0.875rem; }
         body.theme-terminal .calendar-nav a:hover { text-decoration: underline; }
+        body.theme-terminal .calendar-nav .today-btn { color: var(--yellow); font-size: 0.75rem; }
 
         body.theme-terminal .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 0.5rem; }
         body.theme-terminal .calendar-header { color: var(--text-muted); text-align: center; padding: 0.5rem 0; font-size: 0.6875rem; }
@@ -615,9 +630,12 @@
 
             <div class="calendar-card neu">
                 <div class="calendar-nav">
-                    <a href="{{ .PrevMonthURL }}">&larr;</a>
-                    <h2>{{ .CalendarMonthLabel }}</h2>
-                    <a href="{{ .NextMonthURL }}">&rarr;</a>
+                    <a class="arrow" href="{{ .PrevMonthURL }}">&larr;</a>
+                    <div class="calendar-nav-center">
+                        <h2>{{ .CalendarMonthLabel }}</h2>
+                        {{ if not .IsCurrentMonth }}<a class="today-btn" href="{{ .TodayURL }}">Aujourd'hui</a>{{ end }}
+                    </div>
+                    <a class="arrow" href="{{ .NextMonthURL }}">&rarr;</a>
                 </div>
                 <div class="calendar-grid">
                     <div class="calendar-day-header">Lun</div>
@@ -708,9 +726,12 @@
 
                 <div class="bento-item bento-calendar">
                     <div class="calendar-nav">
-                        <a href="{{ .PrevMonthURL }}">&larr;</a>
-                        <h2>{{ .CalendarMonthLabel }}</h2>
-                        <a href="{{ .NextMonthURL }}">&rarr;</a>
+                        <a class="arrow" href="{{ .PrevMonthURL }}">&larr;</a>
+                        <div class="calendar-nav-center">
+                            <h2>{{ .CalendarMonthLabel }}</h2>
+                            {{ if not .IsCurrentMonth }}<a class="today-btn" href="{{ .TodayURL }}">Aujourd'hui</a>{{ end }}
+                        </div>
+                        <a class="arrow" href="{{ .NextMonthURL }}">&rarr;</a>
                     </div>
                     <div class="calendar-grid">
                         <div class="calendar-header">Lun</div>
@@ -816,7 +837,10 @@
                 <div class="section">
                     <div class="calendar-nav">
                         <a href="{{ .PrevMonthURL }}">[prev]</a>
-                        <span>$ cal --schedule {{ .CalendarMonthLabel }}</span>
+                        <div class="calendar-nav-center">
+                            <span>$ cal --schedule {{ .CalendarMonthLabel }}</span>
+                            {{ if not .IsCurrentMonth }}<a class="today-btn" href="{{ .TodayURL }}">[today]</a>{{ end }}
+                        </div>
                         <a href="{{ .NextMonthURL }}">[next]</a>
                     </div>
                     <div class="calendar-grid">

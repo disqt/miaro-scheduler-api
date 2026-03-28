@@ -91,6 +91,18 @@ func renderSchedule(c *gin.Context, team int) {
 	targetMonth := parseMonthParam(c)
 	scheduleBeautified := pkg.FormatScheduleBeautified(schedule, targetMonth)
 
+	// Omit month param from nav URLs when they point to the current month
+	now := time.Now().In(pkg.ParisLoc())
+	currentMonthStr := now.Format("2006-01")
+	prevMonth := scheduleBeautified.PrevMonth
+	if prevMonth == currentMonthStr {
+		prevMonth = ""
+	}
+	nextMonth := scheduleBeautified.NextMonth
+	if nextMonth == currentMonthStr {
+		nextMonth = ""
+	}
+
 	c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
 		"Schedule":               scheduleBeautified.Schedule,
 		"IsWorking":              scheduleBeautified.IsWorking,
@@ -98,8 +110,9 @@ func renderSchedule(c *gin.Context, team int) {
 		"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
 		"CalendarDays":           scheduleBeautified.CalendarDays,
 		"CalendarMonthLabel":     scheduleBeautified.CalendarMonthLabel,
-		"PrevMonthURL":           template.URL(buildMiaroURL(team, scheduleBeautified.PrevMonth)),
-		"NextMonthURL":           template.URL(buildMiaroURL(team, scheduleBeautified.NextMonth)),
+		"PrevMonthURL":           template.URL(buildMiaroURL(team, prevMonth)),
+		"NextMonthURL":           template.URL(buildMiaroURL(team, nextMonth)),
+		"TodayURL":              template.URL(buildMiaroURL(team, "")),
 		"IsCurrentMonth":         scheduleBeautified.IsCurrentMonth,
 		"Team":                   team,
 		"Teams":                  pkg.BuildTeamList(team),
