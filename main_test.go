@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -90,7 +91,7 @@ func TestSchedulerHandler(t *testing.T) {
 	}
 
 	for _, expected := range expectedStrings {
-		if !contains(body, expected) {
+		if !strings.Contains(body, expected) {
 			t.Errorf("Expected response to contain '%s'", expected)
 		}
 	}
@@ -328,17 +329,3 @@ func TestSchedulerJSONHandler_DefaultTeam(t *testing.T) {
 	}
 }
 
-// Helper function
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||
-		(len(s) > len(substr) && containsHelper(s, substr)))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
-}

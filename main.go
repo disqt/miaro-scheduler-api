@@ -24,30 +24,28 @@ import (
 //go:embed templates/*
 var templatesFS embed.FS
 
-// parseTeamParam parses the ?team= query parameter. Returns (team, valid).
-func parseTeamParam(c *gin.Context) (int, bool) {
-	teamStr := c.Query("team")
-	if teamStr == "" {
+// parseTeamString parses and validates a team number string. Returns (team, valid).
+func parseTeamString(s string) (int, bool) {
+	if s == "" {
 		return 0, false
 	}
-	team, err := strconv.Atoi(teamStr)
-	if err != nil || team < 1 || team > pkg.TeamCount {
+	team, err := strconv.Atoi(s)
+	if err != nil || pkg.ValidateTeam(team) != team {
 		return 0, false
 	}
 	return team, true
 }
 
-// readTeamCookie reads the miaro-team cookie. Returns (team, valid).
+func parseTeamParam(c *gin.Context) (int, bool) {
+	return parseTeamString(c.Query("team"))
+}
+
 func readTeamCookie(c *gin.Context) (int, bool) {
 	cookie, err := c.Cookie("miaro-team")
 	if err != nil {
 		return 0, false
 	}
-	team, err := strconv.Atoi(cookie)
-	if err != nil || team < 1 || team > pkg.TeamCount {
-		return 0, false
-	}
-	return team, true
+	return parseTeamString(cookie)
 }
 
 func setTeamCookie(c *gin.Context, team int) {

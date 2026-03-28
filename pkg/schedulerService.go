@@ -4,6 +4,17 @@ import (
 	"time"
 )
 
+// parisLoc is loaded once at init to avoid repeated time.LoadLocation calls.
+var parisLoc *time.Location
+
+func init() {
+	var err error
+	parisLoc, err = time.LoadLocation("Europe/Paris")
+	if err != nil {
+		panic("Failed to load Europe/Paris timezone: " + err.Error())
+	}
+}
+
 type ScheduleType string
 
 const (
@@ -38,16 +49,11 @@ type Schedule struct {
 // Each team's epoch is offset forward by (team-1)*2 days from the base epoch (Aug 31, 2024).
 // Invalid team numbers are clamped to MiaroTeam (team 1).
 func CalculateSchedule(date time.Time, team int) Schedule {
-	loc, err := time.LoadLocation("Europe/Paris")
-	if err != nil {
-		panic("Failed to load Europe/Paris timezone: " + err.Error())
-	}
-
-	date = date.In(loc)
+	date = date.In(parisLoc)
 	team = ValidateTeam(team)
 
 	// Offset epoch forward by (team-1)*2 days
-	initialDate := time.Date(2024, time.August, 31, 0, 0, 0, 0, loc)
+	initialDate := time.Date(2024, time.August, 31, 0, 0, 0, 0, parisLoc)
 	initialDate = initialDate.AddDate(0, 0, (team-1)*2)
 
 	diffDays := int(date.Sub(initialDate).Hours() / 24)
