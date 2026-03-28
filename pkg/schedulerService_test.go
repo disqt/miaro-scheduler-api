@@ -6,8 +6,8 @@ import (
 )
 
 func TestCalculateSchedule_DefaultTime(t *testing.T) {
-	// Test with default time (time.Now())
-	result := CalculateSchedule()
+	// Test with current time and default team
+	result := CalculateSchedule(time.Now(), MiaroTeam)
 
 	// Verify that the result has the correct timezone
 	if result.TimeRequested.Location().String() != "Europe/Paris" {
@@ -129,7 +129,7 @@ func TestCalculateSchedule_SpecificDates(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := CalculateSchedule(tc.date)
+			result := CalculateSchedule(tc.date, MiaroTeam)
 
 			if result.DayInSchedule != tc.expectedDay {
 				t.Errorf("%s: expected day %d, got %d", tc.description, tc.expectedDay, result.DayInSchedule)
@@ -166,7 +166,7 @@ func TestCalculateSchedule_YearBoundary(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := CalculateSchedule(tc.date)
+			result := CalculateSchedule(tc.date, MiaroTeam)
 
 			// Just verify we get valid results
 			if result.DayInSchedule < 0 || result.DayInSchedule > 9 {
@@ -184,7 +184,7 @@ func TestCalculateSchedule_TimezoneConversion(t *testing.T) {
 	// Test that UTC time is properly converted to Paris time
 	utc := time.Date(2024, time.September, 1, 22, 0, 0, 0, time.UTC) // 10 PM UTC
 
-	result := CalculateSchedule(utc)
+	result := CalculateSchedule(utc, MiaroTeam)
 
 	// Verify timezone is Paris
 	if result.TimeRequested.Location().String() != "Europe/Paris" {
@@ -204,16 +204,48 @@ func TestCalculateSchedule_TimezoneConversion(t *testing.T) {
 	}
 }
 
-func TestCalculateSchedule_PanicOnMultipleDates(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("Expected panic when passing multiple dates")
-		}
-	}()
-
+func TestCalculateSchedule_TeamOffset(t *testing.T) {
 	loc, _ := time.LoadLocation("Europe/Paris")
-	date1 := time.Date(2024, time.September, 1, 12, 0, 0, 0, loc)
-	date2 := time.Date(2024, time.September, 2, 12, 0, 0, 0, loc)
+	// On Sep 2, 2024:
+	// Team 1 (epoch Aug 31): diffDays=2, 2%10=2 -> AFTERNOON
+	// Team 2 (epoch Sep 2):  diffDays=0, 0%10=0 -> MORNING
+	date := time.Date(2024, time.September, 2, 12, 0, 0, 0, loc)
 
-	CalculateSchedule(date1, date2)
+	tests := []struct {
+		name         string
+		team         int
+		expectedDay  int
+		expectedType ScheduleType
+	}{
+		{"team 1 on Sep 2", 1, 2, AFTERNOON},
+		{"team 2 on Sep 2", 2, 0, MORNING},
+		{"team 3 on Sep 2", 3, 9, FREE}, // epoch Sep 4, diff=-36h -> int(-1.5)=-1, ((-1%10)+10)%10 = 9 -> FREE
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := CalculateSchedule(date, tc.team)
+			if result.DayInSchedule != tc.expectedDay {
+				t.Errorf("expected day %d, got %d", tc.expectedDay, result.DayInSchedule)
+			}
+			if result.ScheduleType != tc.expectedType {
+				t.Errorf("expected type %s, got %s", tc.expectedType, result.ScheduleType)
+			}
+			if result.Team != tc.team {
+				t.Errorf("expected team %d, got %d", tc.team, result.Team)
+			}
+		})
+	}
+}
+
+func TestCalculateSchedule_InvalidTeamDefaultsTo1(t *testing.T) {
+	loc, _ := time.LoadLocation("Europe/Paris")
+	date := time.Date(2024, time.September, 2, 12, 0, 0, 0, loc)
+
+	result := CalculateSchedule(date, 0)
+	expected := CalculateSchedule(date, 1)
+
+	if result.DayInSchedule != expected.DayInSchedule {
+		t.Errorf("invalid team should default to team 1")
+	}
 }

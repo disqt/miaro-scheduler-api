@@ -3,15 +3,13 @@ package pkg
 import (
 	"os"
 	"strconv"
-	"time"
 )
 
 // Config holds the application configuration.
 type Config struct {
-	Port          string
-	Timezone      string
-	ScheduleStart time.Time
-	EnableCORS    bool
+	Port       string
+	Timezone   string
+	EnableCORS bool
 }
 
 // LoadConfig loads configuration from environment variables with sensible defaults.
@@ -20,20 +18,10 @@ func LoadConfig() (*Config, error) {
 	timezone := getEnv("TIMEZONE", "Europe/Paris")
 	enableCORS := getEnvBool("ENABLE_CORS", false)
 
-	// Load timezone
-	loc, err := time.LoadLocation(timezone)
-	if err != nil {
-		return nil, err
-	}
-
-	// Schedule start date (August 31, 2024 at midnight in the configured timezone)
-	scheduleStart := time.Date(2024, time.August, 31, 0, 0, 0, 0, loc)
-
 	return &Config{
-		Port:          port,
-		Timezone:      timezone,
-		ScheduleStart: scheduleStart,
-		EnableCORS:    enableCORS,
+		Port:       port,
+		Timezone:   timezone,
+		EnableCORS: enableCORS,
 	}, nil
 }
 

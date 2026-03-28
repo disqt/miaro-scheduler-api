@@ -22,7 +22,6 @@ type CalendarDay struct {
 	IsNextWork    bool   // True if this is the next working day
 	IsEmpty       bool   // True for empty cells at start/end of month
 	ShiftClass    string // CSS class: "morning", "afternoon", "night", "free"
-	IsCurrentWeek bool   // True if this day is in the current week
 }
 
 // FormatScheduleBeautified converts a Schedule into human-readable French text.
@@ -33,15 +32,7 @@ func FormatScheduleBeautified(schedule Schedule) ScheduleBeautified {
 
 	isWorking := isWorkingString(schedule)
 
-	scheduleNextWorkingDay, nextWorkingDay := nextWorkingDay(schedule.DayInSchedule)
-
-	// Extract number of days from nextWorkingDay string
-	var nextWorkDays int
-	if nextWorkingDay == "demain" {
-		nextWorkDays = 1
-	} else {
-		fmt.Sscanf(nextWorkingDay, "dans %d jours", &nextWorkDays)
-	}
+	scheduleNextWorkingDay, nextWorkingDay, nextWorkDays := nextWorkingDay(schedule.DayInSchedule)
 
 	calendarDays := GenerateCalendarData(schedule, nextWorkDays)
 
@@ -94,31 +85,29 @@ func isWorkingString(schedule Schedule) string {
 	}
 }
 
-func nextWorkingDay(day int) (string, string) {
-	i := 1 // We initialise at 1 to start from tomorrow
+func nextWorkingDay(day int) (string, string, int) {
+	i := 1 // Start from tomorrow
 	for schedule[(day+i)%10] == FREE {
 		i = i + 1
 	}
 
-	var nextWorkingDay string
-
+	var nextWorkingDayStr string
 	if i == 1 {
-		nextWorkingDay = "demain"
+		nextWorkingDayStr = "demain"
 	} else {
-		nextWorkingDay = fmt.Sprintf("dans %v jours", i)
+		nextWorkingDayStr = fmt.Sprintf("dans %v jours", i)
 	}
 
-	return getBeautifiedSchedule(schedule[(day+i)%10]), nextWorkingDay
+	return getBeautifiedSchedule(schedule[(day+i)%10]), nextWorkingDayStr, i
 }
 
 // GenerateCalendarData generates calendar data for the current month
 func GenerateCalendarData(currentSchedule Schedule, nextWorkDays int) []CalendarDay {
-	loc, _ := time.LoadLocation("Europe/Paris")
-	now := currentSchedule.TimeRequested.In(loc)
+	now := currentSchedule.TimeRequested.In(parisLoc)
 
 	// Get first and last day of current month
 	year, month, _ := now.Date()
-	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, loc)
+	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, parisLoc)
 	lastDay := firstDay.AddDate(0, 1, -1)
 
 	// Calculate weekday offset (Monday = 0, Sunday = 6)
@@ -136,8 +125,8 @@ func GenerateCalendarData(currentSchedule Schedule, nextWorkDays int) []Calendar
 
 	// Add actual days of the month
 	for day := 1; day <= lastDay.Day(); day++ {
-		currentDate := time.Date(year, month, day, 12, 0, 0, 0, loc)
-		daySchedule := CalculateSchedule(currentDate)
+		currentDate := time.Date(year, month, day, 12, 0, 0, 0, parisLoc)
+		daySchedule := CalculateSchedule(currentDate, currentSchedule.Team)
 
 		isToday := day == now.Day()
 		isNextWork := !isToday && daySchedule.ScheduleType != FREE &&
@@ -150,7 +139,7 @@ func GenerateCalendarData(currentSchedule Schedule, nextWorkDays int) []Calendar
 			shiftType = "Matin"
 			shiftClass = "morning"
 		case AFTERNOON:
-			shiftType = "Soir"
+			shiftType = "Après-midi"
 			shiftClass = "afternoon"
 		case NIGHT:
 			shiftType = "Nuit"
