@@ -191,6 +191,143 @@ func TestNotFoundHandler(t *testing.T) {
 	}
 }
 
+func TestSchedulerHandler_TeamFromQueryParam(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?team=3", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	// Check cookie was set
+	cookies := w.Result().Cookies()
+	var teamCookie *http.Cookie
+	for _, c := range cookies {
+		if c.Name == "miaro-team" {
+			teamCookie = c
+		}
+	}
+	if teamCookie == nil {
+		t.Fatal("Expected miaro-team cookie to be set")
+	}
+	if teamCookie.Value != "3" {
+		t.Errorf("Expected cookie value '3', got '%s'", teamCookie.Value)
+	}
+}
+
+func TestSchedulerHandler_Team1RedirectsToCleanURL(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?team=1", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("Expected 302 redirect, got %d", w.Code)
+	}
+	if w.Header().Get("Location") != "/miaro" {
+		t.Errorf("Expected redirect to /miaro, got %s", w.Header().Get("Location"))
+	}
+}
+
+func TestSchedulerHandler_CookieRedirect(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro", nil)
+	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "4"})
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("Expected 302 redirect, got %d", w.Code)
+	}
+	if w.Header().Get("Location") != "/miaro?team=4" {
+		t.Errorf("Expected redirect to /miaro?team=4, got %s", w.Header().Get("Location"))
+	}
+}
+
+func TestSchedulerHandler_CookieTeam1NoRedirect(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro", nil)
+	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "1"})
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200 (no redirect for team 1 cookie), got %d", w.Code)
+	}
+}
+
+func TestSchedulerHandler_InvalidTeamDefaultsTo1(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?team=99", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestSchedulerHandler_InvalidTeamWithCookieRedirects(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?team=abc", nil)
+	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "2"})
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("Expected 302 redirect, got %d", w.Code)
+	}
+	if w.Header().Get("Location") != "/miaro?team=2" {
+		t.Errorf("Expected redirect to /miaro?team=2, got %s", w.Header().Get("Location"))
+	}
+}
+
+func TestSchedulerJSONHandler_WithTeam(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro/json?team=2", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	var response map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	rawSchedule := response["raw_schedule"].(map[string]interface{})
+	team := rawSchedule["team"].(float64)
+	if int(team) != 2 {
+		t.Errorf("Expected team 2 in raw_schedule, got %v", team)
+	}
+}
+
+func TestSchedulerJSONHandler_DefaultTeam(t *testing.T) {
+	router := setupTestRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro/json", nil)
+	router.ServeHTTP(w, req)
+
+	var response map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	rawSchedule := response["raw_schedule"].(map[string]interface{})
+	team := rawSchedule["team"].(float64)
+	if int(team) != 1 {
+		t.Errorf("Expected team 1 in raw_schedule, got %v", team)
+	}
+}
+
 // Helper function
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||

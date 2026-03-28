@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"html/template"
 	"log/slog"
 	"miaro-scheduler-api/pkg"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 	"unicode"
@@ -22,26 +24,98 @@ import (
 //go:embed templates/*
 var templatesFS embed.FS
 
+// parseTeamParam parses the ?team= query parameter. Returns (team, valid).
+func parseTeamParam(c *gin.Context) (int, bool) {
+	teamStr := c.Query("team")
+	if teamStr == "" {
+		return 0, false
+	}
+	team, err := strconv.Atoi(teamStr)
+	if err != nil || team < 1 || team > pkg.TeamCount {
+		return 0, false
+	}
+	return team, true
+}
+
+// readTeamCookie reads the miaro-team cookie. Returns (team, valid).
+func readTeamCookie(c *gin.Context) (int, bool) {
+	cookie, err := c.Cookie("miaro-team")
+	if err != nil {
+		return 0, false
+	}
+	team, err := strconv.Atoi(cookie)
+	if err != nil || team < 1 || team > pkg.TeamCount {
+		return 0, false
+	}
+	return team, true
+}
+
+func setTeamCookie(c *gin.Context, team int) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "miaro-team",
+		Value:    strconv.Itoa(team),
+		Path:     "/miaro",
+		MaxAge:   365 * 24 * 60 * 60,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func renderSchedule(c *gin.Context, team int) {
+	schedule := pkg.CalculateSchedule(time.Now(), team)
+	scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
+
+	c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
+		"Schedule":               scheduleBeautified.Schedule,
+		"IsWorking":              scheduleBeautified.IsWorking,
+		"NextWorkingDay":         scheduleBeautified.NextWorkingDay,
+		"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
+		"CalendarDays":           scheduleBeautified.CalendarDays,
+		"Team":                   team,
+		"Teams":                  pkg.BuildTeamList(team),
+	})
+}
+
 // SchedulerHandler returns a Gin handler for the HTML schedule endpoint.
 func SchedulerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule(time.Now(), pkg.MiaroTeam)
-		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
+		teamParam, hasValidParam := parseTeamParam(c)
+		teamCookie, hasValidCookie := readTeamCookie(c)
 
-		c.HTML(http.StatusOK, "miaroSchedule.tmpl", gin.H{
-			"Schedule":               scheduleBeautified.Schedule,
-			"IsWorking":              scheduleBeautified.IsWorking,
-			"NextWorkingDay":         scheduleBeautified.NextWorkingDay,
-			"ScheduleNextWorkingDay": scheduleBeautified.ScheduleNextWorkingDay,
-			"CalendarDays":           scheduleBeautified.CalendarDays,
-		})
+		// Canonicalize: ?team=1 -> redirect to /miaro
+		if hasValidParam && teamParam == pkg.MiaroTeam {
+			setTeamCookie(c, pkg.MiaroTeam)
+			c.Redirect(http.StatusFound, "/miaro")
+			return
+		}
+
+		if hasValidParam {
+			// Valid ?team=N (2-5): render
+			setTeamCookie(c, teamParam)
+			renderSchedule(c, teamParam)
+			return
+		}
+
+		// No valid param — check cookie
+		if hasValidCookie && teamCookie != pkg.MiaroTeam {
+			c.Redirect(http.StatusFound, fmt.Sprintf("/miaro?team=%d", teamCookie))
+			return
+		}
+
+		// Default: team 1
+		setTeamCookie(c, pkg.MiaroTeam)
+		renderSchedule(c, pkg.MiaroTeam)
 	}
 }
 
 // SchedulerJSONHandler returns a Gin handler for the JSON schedule endpoint.
 func SchedulerJSONHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		schedule := pkg.CalculateSchedule(time.Now(), pkg.MiaroTeam)
+		team := pkg.MiaroTeam
+		if t, valid := parseTeamParam(c); valid {
+			team = t
+		}
+
+		schedule := pkg.CalculateSchedule(time.Now(), team)
 		scheduleBeautified := pkg.FormatScheduleBeautified(schedule)
 
 		c.JSON(http.StatusOK, gin.H{
