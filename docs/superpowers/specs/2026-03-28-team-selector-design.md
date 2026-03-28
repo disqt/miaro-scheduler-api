@@ -6,11 +6,11 @@ Add a dropdown to select between 5 work teams sharing the same 10-day rotating s
 
 | Team | Label | Epoch offset |
 |------|-------|-------------|
-| 1 | Equipe 1 (Miaro) | Aug 31, 2024 (original) |
-| 2 | Equipe 2 | Sep 2, 2024 (+2 days) |
-| 3 | Equipe 3 | Sep 4, 2024 (+4 days) |
-| 4 | Equipe 4 | Sep 6, 2024 (+6 days) |
-| 5 | Equipe 5 | Sep 8, 2024 (+8 days) |
+| 1 | Équipe 1 (Miaro) | Aug 31, 2024 (original) |
+| 2 | Équipe 2 | Sep 2, 2024 (+2 days) |
+| 3 | Équipe 3 | Sep 4, 2024 (+4 days) |
+| 4 | Équipe 4 | Sep 6, 2024 (+6 days) |
+| 5 | Équipe 5 | Sep 8, 2024 (+8 days) |
 
 Formula: `epochDate + (team - 1) * 2 days`
 
@@ -65,11 +65,11 @@ Reads `?team=` query parameter, defaults to 1 if absent or invalid. No cookie lo
 ### Dropdown
 
 A `<select>` element in the header/title area of each theme (Neumorphism, Bento, Terminal). Displays:
-- "Equipe 1 (Miaro)"
-- "Equipe 2"
-- "Equipe 3"
-- "Equipe 4"
-- "Equipe 5"
+- "Équipe 1 (Miaro)"
+- "Équipe 2"
+- "Équipe 3"
+- "Équipe 4"
+- "Équipe 5"
 
 The current team is pre-selected via template data.
 
