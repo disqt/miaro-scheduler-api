@@ -339,11 +339,9 @@ func TestSchedulerHandler_MonthParam(t *testing.T) {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
 
-	// Template outputs CalendarMonthLabel once it's wired (Task 3).
-	// For now, verify the page renders successfully.
 	body := w.Body.String()
-	if len(body) == 0 {
-		t.Error("Expected non-empty HTML response for month=2026-04")
+	if !strings.Contains(body, "Avril 2026") {
+		t.Error("Expected response to contain 'Avril 2026' for month=2026-04")
 	}
 }
 
@@ -370,11 +368,9 @@ func TestSchedulerHandler_MonthAndTeamParams(t *testing.T) {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
 
-	// Template outputs CalendarMonthLabel once it's wired (Task 3).
-	// For now, verify the page renders and the team cookie is set.
 	body := w.Body.String()
-	if len(body) == 0 {
-		t.Error("Expected non-empty HTML response for month=2026-05&team=3")
+	if !strings.Contains(body, "Mai 2026") {
+		t.Error("Expected response to contain 'Mai 2026' for month=2026-05")
 	}
 
 	cookies := w.Result().Cookies()

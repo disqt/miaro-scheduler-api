@@ -43,9 +43,27 @@ var frenchMonths = map[time.Month]string{
 	time.December:  "Décembre",
 }
 
-// FormatScheduleBeautified converts a Schedule into human-readable French text.
-// It determines the current shift type, whether the person is currently working,
-// and when the next working day will be.
+// ScheduleText contains the text-only fields from ScheduleBeautified (no calendar data).
+type ScheduleText struct {
+	Schedule               string
+	IsWorking              string
+	ScheduleNextWorkingDay string
+	NextWorkingDay         string
+}
+
+// FormatScheduleText returns French text for the schedule without generating calendar data.
+func FormatScheduleText(schedule Schedule) ScheduleText {
+	scheduleNextWorkingDay, nextWorkingDay, _ := nextWorkingDay(schedule.DayInSchedule)
+	return ScheduleText{
+		Schedule:               getBeautifiedSchedule(schedule.ScheduleType),
+		IsWorking:              isWorkingString(schedule),
+		ScheduleNextWorkingDay: scheduleNextWorkingDay,
+		NextWorkingDay:         nextWorkingDay,
+	}
+}
+
+// FormatScheduleBeautified converts a Schedule into human-readable French text
+// with full calendar data for the target month.
 func FormatScheduleBeautified(schedule Schedule, targetMonth time.Time) ScheduleBeautified {
 	currentDay := getBeautifiedSchedule(schedule.ScheduleType)
 	isWorking := isWorkingString(schedule)
