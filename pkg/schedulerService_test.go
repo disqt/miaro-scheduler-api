@@ -129,7 +129,7 @@ func TestCalculateSchedule_SpecificDates(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := CalculateSchedule(tc.date, MiaroTeam)
+			result := CalculateSchedule(tc.date, 1) // team 1 has zero offset from base epoch
 
 			if result.DayInSchedule != tc.expectedDay {
 				t.Errorf("%s: expected day %d, got %d", tc.description, tc.expectedDay, result.DayInSchedule)
@@ -184,7 +184,7 @@ func TestCalculateSchedule_TimezoneConversion(t *testing.T) {
 	// Test that UTC time is properly converted to Paris time
 	utc := time.Date(2024, time.September, 1, 22, 0, 0, 0, time.UTC) // 10 PM UTC
 
-	result := CalculateSchedule(utc, MiaroTeam)
+	result := CalculateSchedule(utc, 1) // team 1 for base epoch tests
 
 	// Verify timezone is Paris
 	if result.TimeRequested.Location().String() != "Europe/Paris" {
@@ -238,14 +238,14 @@ func TestCalculateSchedule_TeamOffset(t *testing.T) {
 	}
 }
 
-func TestCalculateSchedule_InvalidTeamDefaultsTo1(t *testing.T) {
+func TestCalculateSchedule_InvalidTeamDefaultsToMiaroTeam(t *testing.T) {
 	loc, _ := time.LoadLocation("Europe/Paris")
 	date := time.Date(2024, time.September, 2, 12, 0, 0, 0, loc)
 
 	result := CalculateSchedule(date, 0)
-	expected := CalculateSchedule(date, 1)
+	expected := CalculateSchedule(date, MiaroTeam)
 
 	if result.DayInSchedule != expected.DayInSchedule {
-		t.Errorf("invalid team should default to team 1")
+		t.Errorf("invalid team should default to MiaroTeam (%d)", MiaroTeam)
 	}
 }

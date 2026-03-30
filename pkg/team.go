@@ -3,7 +3,7 @@ package pkg
 import "fmt"
 
 const (
-	MiaroTeam = 1
+	MiaroTeam = 3
 	TeamCount = 5
 )
 

@@ -12,10 +12,10 @@ func TestValidateTeam(t *testing.T) {
 	}{
 		{"valid team 1", 1, 1},
 		{"valid team 5", 5, 5},
-		{"zero defaults to 1", 0, 1},
-		{"negative defaults to 1", -1, 1},
-		{"too high defaults to 1", 6, 1},
-		{"way too high defaults to 1", 100, 1},
+		{"zero defaults to MiaroTeam", 0, MiaroTeam},
+		{"negative defaults to MiaroTeam", -1, MiaroTeam},
+		{"too high defaults to MiaroTeam", 6, MiaroTeam},
+		{"way too high defaults to MiaroTeam", 100, MiaroTeam},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -32,9 +32,9 @@ func TestTeamLabel(t *testing.T) {
 		team     int
 		expected string
 	}{
-		{1, "Équipe 1 (Miaro)"},
+		{1, "Équipe 1"},
 		{2, "Équipe 2"},
-		{3, "Équipe 3"},
+		{3, "Équipe 3 (Miaro)"},
 		{4, "Équipe 4"},
 		{5, "Équipe 5"},
 	}
@@ -59,7 +59,7 @@ func TestBuildTeamList(t *testing.T) {
 	if teams[0].Selected {
 		t.Error("team 1 should not be selected")
 	}
-	if teams[0].Label != "Équipe 1 (Miaro)" {
-		t.Errorf("team 1 label = %q, want 'Équipe 1 (Miaro)'", teams[0].Label)
+	if teams[2].Label != "Équipe 3 (Miaro)" {
+		t.Errorf("team 3 label = %q, want 'Équipe 3 (Miaro)'", teams[2].Label)
 	}
 }

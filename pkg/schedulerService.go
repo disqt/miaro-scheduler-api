@@ -52,7 +52,7 @@ func ParisLoc() *time.Location {
 
 // CalculateSchedule computes the shift for the given date and team.
 // Each team's epoch is offset forward by (team-1)*2 days from the base epoch (Aug 31, 2024).
-// Invalid team numbers are clamped to MiaroTeam (team 1).
+// Invalid team numbers are clamped to MiaroTeam.
 func CalculateSchedule(date time.Time, team int) Schedule {
 	date = date.In(parisLoc)
 	team = ValidateTeam(team)

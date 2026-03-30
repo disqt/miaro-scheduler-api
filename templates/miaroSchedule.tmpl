@@ -935,12 +935,9 @@
             // Team selector
             window.selectTeam = function(teamNum) {
                 const url = new URL(window.location);
-                if (teamNum === '1' || teamNum === 1) {
-                    url.searchParams.delete('team');
-                } else {
-                    url.searchParams.set('team', teamNum);
-                }
-                window.location.href = url.pathname + '?' + url.searchParams.toString();
+                url.searchParams.set('team', teamNum);
+                const qs = url.searchParams.toString();
+                window.location.href = qs ? url.pathname + '?' + qs : url.pathname;
             };
         })();
     </script>
