@@ -195,7 +195,7 @@ func TestSchedulerHandler_TeamFromQueryParam(t *testing.T) {
 	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/miaro?team=3", nil)
+	req, _ := http.NewRequest("GET", "/miaro?team=2", nil)
 	router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
@@ -213,16 +213,16 @@ func TestSchedulerHandler_TeamFromQueryParam(t *testing.T) {
 	if teamCookie == nil {
 		t.Fatal("Expected miaro-team cookie to be set")
 	}
-	if teamCookie.Value != "3" {
-		t.Errorf("Expected cookie value '3', got '%s'", teamCookie.Value)
+	if teamCookie.Value != "2" {
+		t.Errorf("Expected cookie value '2', got '%s'", teamCookie.Value)
 	}
 }
 
-func TestSchedulerHandler_Team1RedirectsToCleanURL(t *testing.T) {
+func TestSchedulerHandler_MiaroTeamRedirectsToCleanURL(t *testing.T) {
 	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/miaro?team=1", nil)
+	req, _ := http.NewRequest("GET", "/miaro?team=3", nil)
 	router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusFound {
@@ -249,20 +249,20 @@ func TestSchedulerHandler_CookieRedirect(t *testing.T) {
 	}
 }
 
-func TestSchedulerHandler_CookieTeam1NoRedirect(t *testing.T) {
+func TestSchedulerHandler_CookieMiaroTeamNoRedirect(t *testing.T) {
 	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/miaro", nil)
-	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "1"})
+	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "3"})
 	router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
-		t.Errorf("Expected status 200 (no redirect for team 1 cookie), got %d", w.Code)
+		t.Errorf("Expected status 200 (no redirect for MiaroTeam cookie), got %d", w.Code)
 	}
 }
 
-func TestSchedulerHandler_InvalidTeamDefaultsTo1(t *testing.T) {
+func TestSchedulerHandler_InvalidTeamDefaultsToMiaroTeam(t *testing.T) {
 	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
@@ -271,6 +271,39 @@ func TestSchedulerHandler_InvalidTeamDefaultsTo1(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestSchedulerHandler_SwitchToMiaroTeamWithOldCookie(t *testing.T) {
+	router := setupTestRouter()
+
+	// Simulate: user is on team 4 (cookie=4), clicks MiaroTeam (3)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/miaro?team=3", nil)
+	req.AddCookie(&http.Cookie{Name: "miaro-team", Value: "4"})
+	router.ServeHTTP(w, req)
+
+	// Should redirect to /miaro (canonical URL for MiaroTeam)
+	if w.Code != http.StatusFound {
+		t.Errorf("Expected 302 redirect, got %d", w.Code)
+	}
+	if w.Header().Get("Location") != "/miaro" {
+		t.Errorf("Expected redirect to /miaro, got %s", w.Header().Get("Location"))
+	}
+
+	// Cookie should be updated to MiaroTeam
+	cookies := w.Result().Cookies()
+	var teamCookie *http.Cookie
+	for _, c := range cookies {
+		if c.Name == "miaro-team" {
+			teamCookie = c
+		}
+	}
+	if teamCookie == nil {
+		t.Fatal("Expected miaro-team cookie to be set")
+	}
+	if teamCookie.Value != "3" {
+		t.Errorf("Expected cookie value '3', got '%s'", teamCookie.Value)
 	}
 }
 
@@ -323,8 +356,8 @@ func TestSchedulerJSONHandler_DefaultTeam(t *testing.T) {
 
 	rawSchedule := response["raw_schedule"].(map[string]interface{})
 	team := rawSchedule["team"].(float64)
-	if int(team) != 1 {
-		t.Errorf("Expected team 1 in raw_schedule, got %v", team)
+	if int(team) != pkg.MiaroTeam {
+		t.Errorf("Expected team %d in raw_schedule, got %v", pkg.MiaroTeam, team)
 	}
 }
 
@@ -361,7 +394,7 @@ func TestSchedulerHandler_MonthAndTeamParams(t *testing.T) {
 	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/miaro?month=2026-05&team=3", nil)
+	req, _ := http.NewRequest("GET", "/miaro?month=2026-05&team=2", nil)
 	router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {

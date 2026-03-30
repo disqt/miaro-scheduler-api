@@ -77,7 +77,7 @@ func buildMiaroURL(team int, month string) string {
 	if month != "" {
 		params = append(params, fmt.Sprintf("month=%s", month))
 	}
-	if team > pkg.MiaroTeam {
+	if team != pkg.MiaroTeam {
 		params = append(params, fmt.Sprintf("team=%d", team))
 	}
 	if len(params) > 0 {
