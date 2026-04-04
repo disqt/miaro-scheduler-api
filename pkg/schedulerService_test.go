@@ -129,7 +129,7 @@ func TestCalculateSchedule_SpecificDates(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := CalculateSchedule(tc.date, 1) // team 1 has zero offset from base epoch
+			result := CalculateSchedule(tc.date, MiaroTeam) // MiaroTeam (3) has effective epoch Aug 31
 
 			if result.DayInSchedule != tc.expectedDay {
 				t.Errorf("%s: expected day %d, got %d", tc.description, tc.expectedDay, result.DayInSchedule)
@@ -184,7 +184,7 @@ func TestCalculateSchedule_TimezoneConversion(t *testing.T) {
 	// Test that UTC time is properly converted to Paris time
 	utc := time.Date(2024, time.September, 1, 22, 0, 0, 0, time.UTC) // 10 PM UTC
 
-	result := CalculateSchedule(utc, 1) // team 1 for base epoch tests
+	result := CalculateSchedule(utc, MiaroTeam) // MiaroTeam (3) has effective epoch Aug 31
 
 	// Verify timezone is Paris
 	if result.TimeRequested.Location().String() != "Europe/Paris" {
@@ -206,9 +206,10 @@ func TestCalculateSchedule_TimezoneConversion(t *testing.T) {
 
 func TestCalculateSchedule_TeamOffset(t *testing.T) {
 	loc, _ := time.LoadLocation("Europe/Paris")
-	// On Sep 2, 2024:
-	// Team 1 (epoch Aug 31): diffDays=2, 2%10=2 -> AFTERNOON
-	// Team 2 (epoch Sep 2):  diffDays=0, 0%10=0 -> MORNING
+	// On Sep 2, 2024 (base epoch Aug 27):
+	// Team 1 (epoch Aug 27): diffDays=6, 6%10=6 -> FREE
+	// Team 2 (epoch Aug 29): diffDays=4, 4%10=4 -> NIGHT
+	// Team 3 (epoch Aug 31): diffDays=2, 2%10=2 -> AFTERNOON
 	date := time.Date(2024, time.September, 2, 12, 0, 0, 0, loc)
 
 	tests := []struct {
@@ -217,9 +218,9 @@ func TestCalculateSchedule_TeamOffset(t *testing.T) {
 		expectedDay  int
 		expectedType ScheduleType
 	}{
-		{"team 1 on Sep 2", 1, 2, AFTERNOON},
-		{"team 2 on Sep 2", 2, 0, MORNING},
-		{"team 3 on Sep 2", 3, 9, FREE}, // epoch Sep 4, diff=-36h -> int(-1.5)=-1, ((-1%10)+10)%10 = 9 -> FREE
+		{"team 1 on Sep 2", 1, 6, FREE},
+		{"team 2 on Sep 2", 2, 4, NIGHT},
+		{"team 3 on Sep 2", 3, 2, AFTERNOON},
 	}
 
 	for _, tc := range tests {

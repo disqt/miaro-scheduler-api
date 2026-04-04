@@ -30,7 +30,7 @@ Request -> Gin router (main.go) -> Handler -> CalculateSchedule() -> FormatSched
 
 **Team resolution** (HTML handler): `?team=` param > `miaro-team` cookie > default (1). `?team=1` redirects to `/miaro` (canonical). Cookie set with `Secure; SameSite=Lax; Path=/miaro`.
 
-**Schedule calculation** (`pkg/schedulerService.go`): Epoch is Aug 31, 2024 midnight Europe/Paris. Computes `daysSinceEpoch % 10` to determine shift:
+**Schedule calculation** (`pkg/schedulerService.go`): Epoch is Aug 27, 2024 midnight Europe/Paris. Computes `daysSinceEpoch % 10` to determine shift:
 
 | Day index | Shift | Hours |
 |-----------|-------|-------|

@@ -58,7 +58,7 @@ func CalculateSchedule(date time.Time, team int) Schedule {
 	team = ValidateTeam(team)
 
 	// Offset epoch forward by (team-1)*2 days
-	initialDate := time.Date(2024, time.August, 31, 0, 0, 0, 0, parisLoc)
+	initialDate := time.Date(2024, time.August, 27, 0, 0, 0, 0, parisLoc)
 	initialDate = initialDate.AddDate(0, 0, (team-1)*2)
 
 	diffDays := int(date.Sub(initialDate).Hours() / 24)
